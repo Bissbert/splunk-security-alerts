@@ -1,0 +1,180 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build (e.g., 3.0.0)'
+        required: true
+        default: '3.0.0'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Set up environment
+        run: |
+          echo "Building Splunk Security Alerts App"
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+          else
+            VERSION="${{ github.event.inputs.version }}"
+          fi
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "Building version: ${VERSION}"
+
+      - name: Create build directories
+        run: |
+          mkdir -p build dist
+
+      - name: Package Splunk App
+        run: |
+          # Run the packaging script
+          chmod +x scripts/package-splunk-app.sh
+          ./scripts/package-splunk-app.sh ${{ env.VERSION }}
+
+      - name: Create full deployment archive
+        run: |
+          # Create a complete deployment archive
+          echo "Creating deployment archive..."
+          tar -czf "dist/splunk-security-alerts-${{ env.VERSION }}-full.tar.gz" \
+            --exclude='.git' \
+            --exclude='dist' \
+            --exclude='build' \
+            --exclude='.DS_Store' \
+            --exclude='*.pyc' \
+            --exclude='__pycache__' \
+            security_alerts_app/ \
+            deployment/ \
+            security/ \
+            docs/ \
+            tests/ \
+            README.md \
+            LICENSE \
+            scripts/
+
+          # Generate checksum
+          cd dist
+          shasum -a 256 "splunk-security-alerts-${{ env.VERSION }}-full.tar.gz" > \
+            "splunk-security-alerts-${{ env.VERSION }}-full.tar.gz.sha256"
+          cd ..
+
+      - name: Create documentation bundle
+        run: |
+          # Package documentation separately
+          echo "Creating documentation bundle..."
+          tar -czf "dist/splunk-security-alerts-docs-${{ env.VERSION }}.tar.gz" \
+            docs/ \
+            README.md \
+            PROJECT_SUMMARY.md \
+            REORGANIZATION_SUMMARY.md
+
+          # Generate checksum
+          cd dist
+          shasum -a 256 "splunk-security-alerts-docs-${{ env.VERSION }}.tar.gz" > \
+            "splunk-security-alerts-docs-${{ env.VERSION }}.tar.gz.sha256"
+          cd ..
+
+      - name: Generate combined checksums file
+        run: |
+          cd dist
+          echo "# SHA256 Checksums for Splunk Security Alerts v${{ env.VERSION }}" > checksums.txt
+          echo "" >> checksums.txt
+          cat *.sha256 >> checksums.txt
+          cd ..
+
+      - name: List artifacts
+        run: |
+          echo "=== Build Artifacts ==="
+          ls -lah dist/
+          echo ""
+          echo "=== Checksums ==="
+          cat dist/checksums.txt
+
+      - name: Create Release Notes
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          cat > dist/release-notes.md << 'EOF'
+          # Splunk Security Alerts v${{ env.VERSION }}
+
+          ## Release Artifacts
+
+          This release includes the following artifacts:
+
+          ### Splunk App Package
+          - **security_alerts_app-${{ env.VERSION }}.spl** - Ready-to-install Splunk application package
+          - Install directly through Splunk Web UI or CLI
+
+          ### Full Deployment Archive
+          - **splunk-security-alerts-${{ env.VERSION }}-full.tar.gz** - Complete project archive
+          - Includes app, deployment configs, security utilities, and documentation
+          - For manual deployment or customization
+
+          ### Documentation Bundle
+          - **splunk-security-alerts-docs-${{ env.VERSION }}.tar.gz** - All documentation
+          - Quick Start Guide, Glossary, Learning Paths, Case Studies
+
+          ### Verification
+          - **checksums.txt** - SHA256 checksums for all artifacts
+          - Individual .sha256 files for each artifact
+
+          ## Installation
+
+          ### Quick Install (Splunk Web)
+          1. Download `security_alerts_app-${{ env.VERSION }}.spl`
+          2. In Splunk Web, go to Apps → Manage Apps
+          3. Click "Install app from file" and upload the .spl file
+          4. Restart Splunk if prompted
+
+          ### Manual Installation
+          1. Download the full archive
+          2. Extract to your Splunk apps directory
+          3. Follow the Quick Start Guide in docs/
+
+          ## What's New
+
+          - Professional-grade security monitoring alerts
+          - Comprehensive documentation for all experience levels
+          - Automated deployment and configuration
+          - Enhanced incident response workflows
+
+          ## Verification
+
+          Verify artifact integrity using the provided SHA256 checksums:
+          ```bash
+          shasum -a 256 -c checksums.txt
+          ```
+
+          ## Support
+
+          For issues or questions, please open an issue on GitHub.
+          EOF
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5 # v1.14.0
+        with:
+          artifacts: "dist/*"
+          bodyFile: "dist/release-notes.md"
+          draft: false
+          prerelease: false
+          allowUpdates: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifacts (manual trigger)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@694cdabd8bdb0f10b2cea11669e1bf5453eed0a6 # v4.2.0
+        with:
+          name: splunk-security-alerts-${{ env.VERSION }}
+          path: dist/
+          retention-days: 30
