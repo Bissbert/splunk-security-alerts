@@ -1,0 +1,6 @@
+dest_ip,is_malicious,threat_type,confidence,last_seen,source
+192.0.2.1,true,C2,high,2025-01-18,ThreatIntel
+198.51.100.123,true,botnet,medium,2025-01-18,Honeypot
+203.0.113.99,true,scanner,high,2025-01-18,IDS
+192.0.2.50,true,malware,high,2025-01-18,Sandbox
+198.51.100.200,true,phishing,medium,2025-01-18,PhishTank

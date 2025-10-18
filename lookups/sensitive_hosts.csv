@@ -1,0 +1,11 @@
+host,is_sensitive,is_production,asset_value,description,owner
+dc01.corp.local,true,true,critical,Domain Controller,IT Security
+db-prod-01,true,true,critical,Production Database Server,Database Team
+web-prod-01,true,true,high,Production Web Server,Web Team
+web-prod-02,true,true,high,Production Web Server,Web Team
+app-prod-01,true,true,high,Production Application Server,App Team
+backup-01,true,true,critical,Backup Server,IT Operations
+monitoring-01,true,true,high,Monitoring Server,IT Operations
+bastion-01,true,true,critical,Jump Host,IT Security
+vault-01,true,true,critical,Secrets Management,IT Security
+log-collector-01,true,true,high,Central Log Server,IT Security

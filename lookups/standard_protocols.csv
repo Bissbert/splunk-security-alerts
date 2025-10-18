@@ -1,0 +1,11 @@
+protocol_num,protocol_name,is_standard,description
+1,ICMP,true,Internet Control Message Protocol
+6,TCP,true,Transmission Control Protocol
+17,UDP,true,User Datagram Protocol
+41,IPv6,true,IPv6 Encapsulation
+47,GRE,true,Generic Routing Encapsulation
+50,ESP,true,Encapsulating Security Payload
+51,AH,true,Authentication Header
+58,ICMPv6,true,ICMP for IPv6
+89,OSPF,true,Open Shortest Path First
+132,SCTP,true,Stream Control Transmission Protocol

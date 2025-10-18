@@ -1,0 +1,263 @@
+<dashboard version="1.1">
+  <label>Security Operations Dashboard</label>
+  <description>Real-time security monitoring and threat overview</description>
+  <row>
+    <panel>
+      <title>Active Threats - Last 24 Hours</title>
+      <single>
+        <search>
+          <query>
+            index=* severity=critical OR severity=high
+            | stats count
+          </query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <refresh>30s</refresh>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="colorBy">value</option>
+        <option name="colorMode">block</option>
+        <option name="rangeColors">["0x65A637","0xF7BC38","0xF58F39","0xD93F3C"]</option>
+        <option name="rangeValues">[0,10,50,100]</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="underLabel">Critical/High Severity Events</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Unauthorized SSH Attempts</title>
+      <single>
+        <search>
+          <query>
+            index=* source="/var/log/secure*" OR source="/var/log/auth*"
+            | rex field=_raw "sshd\[\d+\]:\s+(?&lt;ssh_status&gt;Accepted|Failed)"
+            | search ssh_status="Accepted"
+            | lookup authorized_ips.csv src_ip OUTPUT authorized
+            | where NOT authorized="true"
+            | stats count
+          </query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <refresh>1m</refresh>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="colorBy">value</option>
+        <option name="colorMode">block</option>
+        <option name="rangeColors">["0x65A637","0xF58F39","0xD93F3C"]</option>
+        <option name="rangeValues">[0,1,5]</option>
+        <option name="underLabel">Unauthorized SSH Access</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Data Exfiltration Risk</title>
+      <single>
+        <search>
+          <query>
+            index=* (sourcetype=firewall OR sourcetype=netflow)
+            | eval bytes_out=coalesce(bytes_out, bytes_sent, sc_bytes)
+            | where bytes_out > 104857600
+            | regex dest_ip="^(?!10\.|172\.1[6-9]\.|172\.2[0-9]\.|172\.3[0-1]\.|192\.168\.)"
+            | stats sum(bytes_out) as total_bytes
+            | eval total_gb=round(total_bytes/1073741824, 2)
+          </query>
+          <earliest>-4h@h</earliest>
+          <latest>now</latest>
+          <refresh>5m</refresh>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="numberPrecision">0.00</option>
+        <option name="rangeColors">["0x65A637","0xF7BC38","0xF58F39","0xD93F3C"]</option>
+        <option name="rangeValues">[0,10,100,500]</option>
+        <option name="underLabel">External Data Transfer (GB)</option>
+        <option name="unit">GB</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Failed Authentications</title>
+      <single>
+        <search>
+          <query>
+            index=* (EventCode=4625 OR "Failed password" OR status=401)
+            | stats count
+          </query>
+          <earliest>-1h@h</earliest>
+          <latest>now</latest>
+          <refresh>30s</refresh>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="colorBy">value</option>
+        <option name="colorMode">block</option>
+        <option name="rangeColors">["0x65A637","0xF7BC38","0xF58F39","0xD93F3C"]</option>
+        <option name="rangeValues">[0,50,100,500]</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="underLabel">Failed Logins (1 Hour)</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Alert Timeline - Last 24 Hours</title>
+      <chart>
+        <search>
+          <query>
+            index=* (severity=critical OR severity=high OR severity=medium)
+            | timechart span=1h count by severity
+          </query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <refresh>5m</refresh>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.legend.placement">bottom</option>
+        <option name="charting.axisTitleX.text">Time</option>
+        <option name="charting.axisTitleY.text">Alert Count</option>
+        <option name="charting.fieldColors">{"critical":"#D93F3C","high":"#F58F39","medium":"#F7BC38","low":"#65A637"}</option>
+      </chart>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Top Attacking IPs</title>
+      <table>
+        <search>
+          <query>
+            index=* (ssh_action="Failed" OR EventCode=4625 OR action="DROP" OR action="DENY")
+            | eval src_ip=coalesce(src_ip, Source_Network_Address, client_ip)
+            | stats count as attempts, dc(host) as targets, values(host) as target_hosts by src_ip
+            | lookup malicious_ips.csv src_ip OUTPUT is_malicious threat_type
+            | eval threat_status=if(is_malicious="true", threat_type, "unknown")
+            | sort -attempts
+            | head 10
+          </query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <refresh>5m</refresh>
+        </search>
+        <option name="drilldown">cell</option>
+        <option name="count">10</option>
+        <format type="color" field="attempts">
+          <colorPalette type="minMidMax" maxColor="#D93F3C" midColor="#F7BC38" minColor="#65A637"></colorPalette>
+          <scale type="minMidMax" midType="percentile" midValue="50"></scale>
+        </format>
+        <format type="color" field="threat_status">
+          <colorPalette type="map">{"C2":"#D93F3C","botnet":"#F58F39","scanner":"#F7BC38","unknown":"#999999"}</colorPalette>
+        </format>
+      </table>
+    </panel>
+    <panel>
+      <title>Top Targeted Systems</title>
+      <table>
+        <search>
+          <query>
+            index=* (severity=critical OR severity=high OR alert_name=*)
+            | stats count as events, dc(src_ip) as unique_sources, values(alert_name) as alerts by host
+            | lookup sensitive_hosts.csv host OUTPUT asset_value
+            | fillnull value="standard" asset_value
+            | sort -events
+            | head 10
+          </query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <refresh>5m</refresh>
+        </search>
+        <option name="drilldown">cell</option>
+        <option name="count">10</option>
+        <format type="color" field="asset_value">
+          <colorPalette type="map">{"critical":"#D93F3C","high":"#F58F39","medium":"#F7BC38","standard":"#65A637"}</colorPalette>
+        </format>
+      </table>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Security Events by Category</title>
+      <chart>
+        <search>
+          <query>
+            index=* alert_name=*
+            | eval category=case(
+                match(alert_name, "SSH|Authentication|Logon"), "Authentication",
+                match(alert_name, "Privilege|Escalation"), "Privilege Escalation",
+                match(alert_name, "Lateral|Movement"), "Lateral Movement",
+                match(alert_name, "Exfiltration|Transfer"), "Data Exfiltration",
+                match(alert_name, "Persistence|Scheduled"), "Persistence",
+                match(alert_name, "Process|Execution"), "Execution",
+                match(alert_name, "Port|Scan|Network"), "Network",
+                1=1, "Other"
+            )
+            | stats count by category
+          </query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <refresh>5m</refresh>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Authentication Success vs Failure</title>
+      <chart>
+        <search>
+          <query>
+            index=* (EventCode=4624 OR EventCode=4625 OR "Accepted password" OR "Failed password")
+            | eval status=case(
+                EventCode=4624 OR match(_raw, "Accepted"), "Success",
+                EventCode=4625 OR match(_raw, "Failed"), "Failed",
+                1=1, "Unknown"
+            )
+            | timechart span=1h count by status
+          </query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <refresh>5m</refresh>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.legend.placement">bottom</option>
+        <option name="charting.fieldColors">{"Success":"#65A637","Failed":"#D93F3C"}</option>
+      </chart>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Recent Critical Alerts</title>
+      <table>
+        <search>
+          <query>
+            index=* severity=critical
+            | eval time=strftime(_time, "%Y-%m-%d %H:%M:%S")
+            | table time, alert_name, host, user, src_ip, severity, risk_score
+            | sort -_time
+            | head 20
+          </query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <refresh>1m</refresh>
+        </search>
+        <option name="drilldown">cell</option>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <format type="color" field="severity">
+          <colorPalette type="map">{"critical":"#D93F3C","high":"#F58F39","medium":"#F7BC38","low":"#65A637"}</colorPalette>
+        </format>
+      </table>
+    </panel>
+  </row>
+</dashboard>

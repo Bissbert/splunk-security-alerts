@@ -1,0 +1,88 @@
+# Splunk specific
+*.pyc
+*.pyo
+local/
+local.meta
+*.tmp
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Metadata
+metadata/local.meta
+metadata/local/
+
+# User-specific configurations
+local/*
+!local/app.conf
+!local/savedsearches.conf
+
+# Splunk persistent data
+*.spl
+*.tar.gz
+*.tgz
+
+# Lookups with sensitive data
+lookups/*_cache.csv
+lookups/*.csv.bak
+lookups/temp_*.csv
+
+# Log files
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+env/
+venv/
+.env
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+test-results/
+
+# Documentation builds
+docs/_build/
+docs/_static/
+docs/_templates/
+
+# Deployment
+deploy/
+dist/
+build/
+*.egg-info/
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# Security - Never commit these
+*.pem
+*.key
+*.crt
+*.pfx
+credentials.conf
+passwords.conf
+auth/*.conf
+
+# OS Files
+Thumbs.db
+.Spotlight-V100
+.Trashes

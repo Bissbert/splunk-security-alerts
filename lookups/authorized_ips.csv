@@ -1,0 +1,8 @@
+src_ip,authorized,description,last_updated
+10.0.0.0/8,true,Internal Network - Private Range,2025-01-18
+172.16.0.0/12,true,Internal Network - Private Range,2025-01-18
+192.168.0.0/16,true,Internal Network - Private Range,2025-01-18
+203.0.113.0/24,true,Office VPN Range,2025-01-18
+198.51.100.0/24,true,Data Center Range,2025-01-18
+127.0.0.1,true,Localhost,2025-01-18
+::1,true,IPv6 Localhost,2025-01-18

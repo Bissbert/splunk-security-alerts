@@ -1,0 +1,16 @@
+file_path,is_critical,category,monitoring_enabled
+/etc/passwd,true,authentication,true
+/etc/shadow,true,authentication,true
+/etc/sudoers,true,authorization,true
+/etc/ssh/sshd_config,true,configuration,true
+/etc/hosts,true,networking,true
+/etc/fstab,true,system,true
+/etc/crontab,true,scheduling,true
+/etc/pam.d/*,true,authentication,true
+/root/.ssh/authorized_keys,true,authentication,true
+/home/*/.ssh/authorized_keys,true,authentication,true
+C:\\Windows\\System32\\config\\SAM,true,authentication,true
+C:\\Windows\\System32\\config\\SYSTEM,true,system,true
+C:\\Windows\\System32\\config\\SECURITY,true,security,true
+C:\\Windows\\System32\\drivers\\etc\\hosts,true,networking,true
+C:\\Windows\\System32\\Tasks\\*,true,scheduling,true

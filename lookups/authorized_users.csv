@@ -1,0 +1,11 @@
+user,is_admin,is_service_account,department,last_review
+admin,true,false,IT Security,2025-01-18
+root,true,false,System,2025-01-18
+administrator,true,false,IT Operations,2025-01-18
+sysadmin,true,false,IT Operations,2025-01-18
+dbadmin,true,false,Database Team,2025-01-18
+secops,true,false,Security Operations,2025-01-18
+backup_svc,false,true,IT Operations,2025-01-18
+monitoring_svc,false,true,IT Operations,2025-01-18
+app_svc,false,true,Application Team,2025-01-18
+splunk_svc,false,true,IT Security,2025-01-18

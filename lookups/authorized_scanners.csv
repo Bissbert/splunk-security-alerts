@@ -1,0 +1,4 @@
+src_ip,is_authorized,description,owner
+10.10.10.5,true,Vulnerability Scanner,Security Team
+10.10.10.6,true,Network Discovery Tool,Network Team
+192.168.100.50,true,Monitoring System,IT Operations
