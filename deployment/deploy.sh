@@ -66,14 +66,16 @@ deploy_app() {
     # Create app directory structure
     mkdir -p "$app_path"/{default,local,lookups,metadata}
 
-    # Copy configuration files
-    cp -r default/* "$app_path/default/" 2>/dev/null || true
-    cp -r lookups/* "$app_path/lookups/" 2>/dev/null || true
+    # Copy configuration files from the new app structure
+    cp -r security_alerts_app/default/* "$app_path/default/" 2>/dev/null || true
+    cp -r security_alerts_app/lookups/* "$app_path/lookups/" 2>/dev/null || true
+    cp -r security_alerts_app/bin/* "$app_path/bin/" 2>/dev/null || true
+    cp -r security_alerts_app/metadata/* "$app_path/metadata/" 2>/dev/null || true
 
-    # Copy dashboards to the correct location
-    if [[ -d "dashboards" ]]; then
+    # Dashboards are already in the correct location in security_alerts_app
+    if [[ -d "security_alerts_app/default/data/ui/views" ]]; then
         mkdir -p "$app_path/default/data/ui/views"
-        cp dashboards/*.xml "$app_path/default/data/ui/views/"
+        cp security_alerts_app/default/data/ui/views/*.xml "$app_path/default/data/ui/views/"
     fi
 
     # Create app.conf
