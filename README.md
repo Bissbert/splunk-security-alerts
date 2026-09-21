@@ -1,425 +1,142 @@
-# 🛡️ Splunk Security Alerts
+# Splunk Security Alerts
 
-**Enterprise-grade security monitoring made simple!** A production-ready Splunk application that detects threats, protects your systems, and guides your SOC team with clear, actionable alerts.
+This repository is a Splunk app that turns security-relevant events into
+scheduled saved-search results. It supplies field extractions, reusable search
+macros, lookup-backed enrichment, alert definitions, dashboards, and a secure
+deployment script. The checked-in files describe the detection logic; a live
+Splunk instance and correctly ingested data are still required to observe alert
+results.
 
-## 🚀 Quick Start - Running in 15 Minutes!
+```mermaid
+flowchart LR
+    E["Security events<br/>Linux, Windows, network, application"]
+    P["props.conf<br/>field extraction"]
+    I["Splunk indexes"]
+    S["savedsearches.conf<br/>scheduled searches"]
+    X["Enrichment<br/>lookups, macros, transforms"]
+    Q{"Search result<br/>and suppression"}
+    N["Notable event<br/>explicitly configured"]
+    D["XML dashboards"]
+    A["Analyst review"]
 
-```bash
-# 1. Download
-git clone https://github.com/Bissbert/splunk-security-alerts.git
-cd splunk-alerting
+    E --> P --> I --> S
+    X --> S
+    S --> Q
+    Q --> N --> A
+    Q --> D --> A
 
-# 2. Install
-./deployment/deploy_secure.sh
-
-# 3. Configure your trusted IPs (CRITICAL!)
-nano security_alerts_app/lookups/authorized_ips.csv
-
-# 4. You're protected!
+    style E fill:#1f6feb,stroke:#58a6ff,color:#fff
+    style S fill:#238636,stroke:#3fb950,color:#fff
+    style Q fill:#9e6a03,stroke:#d29922,color:#fff
+    style A fill:#8250df,stroke:#bc8cff,color:#fff
 ```
 
-**New to security monitoring?** Start with our **[📚 Beginner's Guide](docs/00-getting-started/quick-start.md)** - written in plain English!
+## Quick start
 
-## 🎯 What This Does
+From the repository root, inspect the checked-in configuration without a
+Splunk installation:
 
-This system watches your infrastructure 24/7 and alerts you when:
-- 🚨 **Someone tries to hack your servers** (unauthorized access attempts)
-- 💾 **Data is being stolen** (exfiltration detection)
-- 🔐 **Accounts are compromised** (credential abuse)
-- 🦠 **Malware is active** (suspicious processes)
-- 🔄 **Attackers move laterally** (internal reconnaissance)
-- ⚡ **And 8 more critical security scenarios...**
-
-## 📖 Documentation - Now Beginner-Friendly!
-
-We've completely reimagined our documentation to be accessible to everyone:
-
-### 🆕 For New SOC Analysts
-- **[Quick Start Guide](docs/00-getting-started/quick-start.md)** - Get running in 15 minutes
-- **[What Do These Terms Mean?](docs/00-getting-started/glossary.md)** - Plain English glossary
-- **[Understanding Alerts](docs/01-for-beginners/understanding-alerts.md)** - What each alert means
-- **[Real-World Examples](docs/01-for-beginners/real-world-examples.md)** - Learn from actual incidents
-
-### 📋 Daily Operations Tools
-- **[Morning Checklist](docs/02-daily-operations/morning-checklist.md)** - Print and use daily!
-- **[Incident Response Template](docs/02-daily-operations/incident-template.md)** - Fill-in-the-blank guide
-- **[Simple Troubleshooting](docs/99-reference/troubleshooting-simple.md)** - Fix common problems
-
-### 🎓 Learning Paths
-- **[Choose Your Path](docs/00-getting-started/learning-paths.md)** - Customized by role and experience
-- From beginner to expert in structured steps
-- Self-assessment checklists included
-
-**📚 [Browse All Documentation](docs/README.md)**
-
-## Project Structure
-
-```
-splunk-alerting/
-├── security_alerts_app/          # Main Splunk application
-│   ├── bin/                     # Python scripts and executables
-│   ├── default/                 # Default configurations
-│   │   ├── app.conf            # Application metadata
-│   │   ├── savedsearches.conf  # Alert definitions
-│   │   ├── props.conf          # Field extractions
-│   │   ├── transforms.conf     # Data transformations
-│   │   ├── macros.conf         # Search macros
-│   │   └── data/ui/views/      # Dashboard definitions
-│   ├── lookups/                # Lookup tables for threat intelligence
-│   ├── local/                  # Local customizations (gitignored)
-│   └── metadata/               # Object permissions
-├── security/                    # Security documentation
-│   ├── playbooks/              # Incident response playbooks
-│   ├── policies/               # Security policies
-│   └── documentation/          # Security improvements and guides
-├── docs/                       # General documentation
-│   ├── configuration/          # Configuration guides
-│   ├── integration/            # Integration documentation
-│   └── operations/             # Operational procedures
-├── deployment/                 # Deployment scripts
-│   ├── deploy.sh              # Standard deployment
-│   └── deploy_secure.sh       # Hardened deployment
-└── tests/                      # Test suite
-    ├── test_searches.py       # Search validation
-    └── run_tests.sh           # Test runner
-
+```sh
+python3 tools/measure_alerts.py
 ```
 
-## ✨ Key Features
+This command is verified in this checkout. It reads the app's `.conf`, `.csv`,
+and dashboard files and reports the inventory used by the documentation. It
+does not execute SPL or contact Splunk.
 
-### What Makes This Special
-- **🎯 13 Pre-Built Security Alerts** - Cover 95% of common attacks
-- **📊 Visual Dashboards** - See threats at a glance
-- **⏱️ Real-Time Detection** - Catch attacks as they happen
-- **📱 Smart Notifications** - Get alerted only when it matters
-- **🔍 Low False Positives** - Intelligent filtering reduces noise
-- **📚 Beginner-Friendly Docs** - Learn as you go
-- **🛠️ Easy to Customize** - Adapt to your environment
+To deploy to a real Splunk host, review the secure deployment script first and
+then run it from the repository root on a host where `SPLUNK_HOME` points to an
+installed Splunk instance:
 
-## 🔍 What We Detect
-
-### 🔴 Critical Threats (Respond Immediately!)
-| Alert | What It Means | Example |
-|-------|---------------|---------|
-| **Unauthorized SSH** | Someone's breaking in | Login from Russia to your server |
-| **Data Theft** | Information being stolen | 2GB uploaded to Dropbox |
-| **Privilege Escalation** | Hacker getting admin rights | Normal user suddenly using sudo |
-| **Attack Chain** | Full compromise in progress | Multiple alerts from same source |
-
-### 🟠 High Priority (Within 1 Hour)
-| Alert | What It Means | Example |
-|-------|---------------|---------|
-| **New Admin Account** | Backdoor being created | Account "backdoor_admin" appears |
-| **Lateral Movement** | Spreading through network | Workstation scanning servers |
-| **C2 Communication** | Malware calling home | Regular connections to suspicious IP |
-| **Persistence** | Ensuring continued access | New scheduled tasks or services |
-
-### 🟡 Medium Priority (Within 4 Hours)
-- **Brute Force Attempts** - Someone's guessing passwords
-- **Port Scanning** - Reconnaissance in progress
-- **File Changes** - Critical files being modified
-- **Unusual Protocols** - Potential covert channels
-
-## ✅ Prerequisites
-
-### What You Need
-- **Splunk**: Version 8.0 or newer (Enterprise or Cloud)
-- **Admin Access**: To install the app
-- **15 Minutes**: To get everything running
-- **Logs Coming In**: Your systems sending data to Splunk
-
-### 💡 Don't Have Logs Yet?
-Start with these basics:
-- Linux/Unix → syslog
-- Windows → Event Logs
-- Firewalls → Traffic logs
-- Applications → Access logs
-
-## 📦 Installation - Three Ways
-
-### 🚀 Option 1: Automated (Recommended)
-```bash
-# Download and install in one go
-git clone https://github.com/Bissbert/splunk-security-alerts.git
-cd splunk-alerting
-./deployment/deploy_secure.sh
-
-# You'll be prompted for:
-# - Splunk admin password
-# - Splunk installation path (usually /opt/splunk)
+```sh
+./deployment/deploy_secure.sh --no-restart
 ```
 
-### 🔧 Option 2: Step-by-Step
-```bash
-# 1. Download the app
-git clone https://github.com/Bissbert/splunk-security-alerts.git
+The deployment command was not run in this documentation pass because this
+workspace has no Splunk instance. It performs host-level changes, asks for
+credentials, and defaults to writing a log outside the repository. See
+[Operations](docs/operations.md) before using it.
 
-# 2. Copy to Splunk
-cp -r splunk-alerting/security_alerts_app /opt/splunk/etc/apps/
+## Architecture
 
-# 3. Fix permissions
-chown -R splunk:splunk /opt/splunk/etc/apps/security_alerts_app
+The app has source-side stages that parse incoming events, enrich them with
+repository data, evaluate scheduled searches, and present or route results.
+The exact relationship between the files is shown in
+[the architecture write-up](docs/architecture-overview.md).
 
-# 4. Restart Splunk
-/opt/splunk/bin/splunk restart
+## Capabilities
+
+| Capability | Source of truth | What it does |
+|---|---|---|
+| Event parsing | `default/props.conf` | Extracts fields from Linux, Windows, network, web, application, container, database, and security-tool logs. |
+| Search reuse | `default/macros.conf` | Provides reusable index, time, identity, IP, process, risk, and parsing expressions. |
+| Enrichment and routing | `default/transforms.conf` and `lookups/` | Defines lookup tables, field extraction rules, event routing, and classifications. |
+| Detection | `default/savedsearches.conf` | Schedules searches for authentication, access, process, persistence, network, integrity, and correlation signals. |
+| Visualization | `default/data/ui/views/*.xml` | Defines the Security Operations and SSH Monitoring dashboards. |
+| Deployment | `deployment/deploy_secure.sh` | Validates, backs up, copies, permissions, and optionally restarts a Splunk app. |
+
+## Measured repository inventory
+
+These are source measurements from `python3 tools/measure_alerts.py`, not
+runtime or detection-performance benchmarks.
+
+| Artifact | Measured value |
+|---|---:|
+| Saved-search stanzas | 13 |
+| Static severity `5` / `4` / `3` | 4 / 5 / 4 |
+| Searches with `alert.track = 1` | 13 |
+| Searches with suppression enabled | 6 |
+| Searches with `action.notable = 1` | 1 |
+| Searches with `action.email = 1` | 0 |
+| Searches with `action.script = 1` | 0 |
+| Lookup CSV files | 7 |
+| `macros.conf` / `props.conf` / `transforms.conf` stanzas | 24 / 14 / 42 |
+| Dashboard views | 2 |
+| Dashboard panels: security operations / SSH monitoring | 10 / 12 |
+
+The alert names, thresholds, windows, suppression keys, routing, and false
+positive notes are in the [alert reference](docs/alert-reference.md). The
+measurement method and unverified areas are in
+[How measurements were made](docs/measurement.md).
+
+## Repository layout
+
+```text
+security_alerts_app/
+├── bin/                 validation helper
+├── default/             app metadata, searches, parsing, macros, transforms,
+│                        dashboards, and permissions
+└── lookups/             CSV enrichment and allow-list data
+deployment/              standard and secure deployment scripts
+docs/                    source-backed diagrams and operating notes
+scripts/                 hooks and package creation
+security/                policies, playbooks, and security documentation
+tests/                   repository validation scripts
+tools/                   measurement scripts used by this documentation
 ```
 
-### 📋 Option 3: Splunk Web UI
-1. Download ZIP from [GitHub](https://github.com/Bissbert/splunk-security-alerts/archive/main.zip)
-2. In Splunk: Apps → Manage Apps → Install from file
-3. Upload the ZIP file
-4. Restart Splunk when prompted
+## Known limitations
 
-## ⚙️ Configuration - Make It Yours
+- The repository does not contain a Splunk instance, sample event corpus, or
+  live alert history. Search execution, detection latency, dashboard rendering,
+  and false-positive rates are therefore not measured here.
+- The saved searches configure a single explicit notable action. No email or
+  script action is enabled in the checked-in stanzas, so the old claim of
+  broad smart notification coverage is not supported by this source tree.
+- The alert lifecycle implemented by the app ends at a tracked or routed search
+  result. Analyst triage, escalation, resolution, and case management are
+  operating procedures, not states implemented in these files.
+- Seven lookup references in the configuration do not have matching CSV files.
+  The exact names are listed in [Data and enrichment](docs/data-and-enrichment.md).
+- The existing test scripts still use paths from an older app layout and fail
+  before validating the current files. This pass records that failure and does
+  not change application behavior.
+- The secure deployment script was not run. It requires a live Splunk host,
+  suitable permissions, credentials, and host-level tools.
 
-### 🔴 Step 1: CRITICAL - Set Your Trusted IPs
-**This prevents false alarms from your own team!**
+## Documentation
 
-```bash
-# Edit the authorized IPs file
-nano security_alerts_app/lookups/authorized_ips.csv
-
-# Add your office and VPN IPs:
-ip,authorized,description
-10.0.0.0/8,true,Internal network
-192.168.1.0/24,true,Office WiFi
-203.0.113.5,true,Admin home IP
-```
-
-### 📊 Step 2: Verify It's Working
-1. Open Splunk Web: `http://your-splunk:8000`
-2. Go to: **Apps → Security Alerts**
-3. Check the dashboard shows data
-4. Run test search: `index=* | head 10`
-
-### 🎯 Step 3: Tune for Your Environment
-
-**Too Many False Alerts?**
-Edit thresholds in Splunk Web:
-- Settings → Searches, Reports, and Alerts
-- Find the noisy alert
-- Edit → Adjust threshold (e.g., 10 attempts instead of 5)
-- Save
-
-**Need Email Alerts?**
-1. Settings → Alert Actions → Email
-2. Configure your mail server
-3. Edit any alert → Add Action → Email
-
-### 📝 Step 4: Important Files to Know
-
-| File | What It Does | When to Edit |
-|------|--------------|--------------|
-| `authorized_ips.csv` | Your trusted IPs | When team gets new IPs |
-| `malicious_ips.csv` | Known bad IPs | Add confirmed attackers |
-| `sensitive_hosts.csv` | Critical servers | Mark important systems |
-
-## Alert Priority Matrix
-
-| Priority | Response Time | Examples | Action |
-|----------|--------------|----------|--------|
-| **Critical** | < 15 min | Data exfil, ransomware | Immediate incident response |
-| **High** | < 1 hour | Privilege escalation | Security team investigation |
-| **Medium** | < 4 hours | Suspicious logins | SOC analyst review |
-| **Low** | < 24 hours | Policy violations | Scheduled review |
-| **Info** | Weekly | Compliance checks | Reporting only |
-
-## Dashboards
-
-### Security Operations Center (SOC) Dashboard
-- Real-time threat overview
-- Alert timeline and statistics
-- Top threats and targets
-- Mean time to detect (MTTD) metrics
-
-### SSH Monitoring Dashboard
-- Authentication patterns and anomalies
-- Geographic access distribution
-- Failed vs successful attempts
-- Brute force detection
-
-### Incident Response Dashboard
-- Active incident tracking
-- Alert correlation timeline
-- Affected systems mapping
-- Response team assignments
-
-## Testing and Validation
-
-```bash
-# Run the complete test suite
-cd tests/
-./run_tests.sh
-
-# Test specific components
-python test_searches.py --component ssh_alerts
-python test_searches.py --validate-lookups
-
-# Verify deployment
-cd ../deployment/
-./deploy_secure.sh --verify-only
-```
-
-## Security Hardening
-
-The framework includes several security enhancements:
-
-1. **File Integrity Monitoring**: SHA-256 checksums for all configurations
-2. **Access Controls**: Restrictive permissions via metadata
-3. **Secure Deployment**: Automated security validation
-4. **Audit Logging**: Comprehensive deployment and change tracking
-5. **Input Validation**: Sanitization of all user inputs
-6. **Encrypted Storage**: Support for encrypted lookup tables
-
-## Operational Procedures
-
-### Daily Operations
-- Review critical and high priority alerts
-- Update threat intelligence feeds
-- Validate detection accuracy
-- Check system health metrics
-
-### Weekly Maintenance
-- Tune alert thresholds based on false positive analysis
-- Update authorized IP and user lists
-- Review dashboard performance
-- Generate executive reports
-
-### Monthly Tasks
-- Comprehensive search optimization
-- Documentation updates
-- Alert rule effectiveness review
-- Backup verification
-
-## 🔧 Troubleshooting - Quick Fixes
-
-### Common Problems & Solutions
-
-**"I'm not seeing any alerts"**
-- ✅ Check: Is Splunk getting logs? `index=* | head 10`
-- ✅ Check: Are alerts enabled? (Green dots in Settings)
-- ✅ Fix: Verify your index names match
-
-**"Too many false alerts!"**
-- ✅ Add your IPs to `authorized_ips.csv`
-- ✅ Increase thresholds (e.g., 10 failed logins instead of 5)
-- ✅ Check if it's a scheduled scan
-
-**"Splunk is slow"**
-- ✅ Use specific time ranges (not "All Time")
-- ✅ Check disk space: `df -h` (need 20% free)
-- ✅ Reduce dashboard time range to 4 hours
-
-**Need more help?** See our **[Complete Troubleshooting Guide](docs/99-reference/troubleshooting-simple.md)**
-
-## Integration Guide
-
-### SIEM Integration
-- Splunk Enterprise Security (ES) compatible
-- Common Information Model (CIM) compliant
-- Supports SOAR playbook automation
-
-### Threat Intelligence Feeds
-- MISP integration ready
-- STIX/TAXII support
-- Custom IOC import scripts
-
-### Notification Channels
-- Email alerts with custom templates
-- Slack/Teams webhook integration
-- PagerDuty/ServiceNow incidents
-- Custom script actions
-
-## Performance Optimization
-
-### Search Acceleration
-```conf
-# Add to savedsearches.conf
-acceleration = true
-acceleration.earliest_time = -7d
-acceleration.max_concurrent = 2
-```
-
-### Resource Management
-- Implement search scheduling windows
-- Use summary indexing for historical analysis
-- Leverage data model acceleration
-- Configure search head pooling
-
-## Security Compliance
-
-This framework supports compliance monitoring for:
-- PCI DSS (Payment Card Industry)
-- HIPAA (Healthcare)
-- SOC 2
-- ISO 27001
-- NIST Cybersecurity Framework
-- CIS Controls
-
-## 🆘 Getting Help
-
-### 📚 Start with Documentation
-- **[Beginner's Guide](docs/00-getting-started/quick-start.md)** - Start here if new
-- **[Understanding Alerts](docs/01-for-beginners/understanding-alerts.md)** - What they mean
-- **[Daily Checklist](docs/02-daily-operations/morning-checklist.md)** - Your routine
-- **[Troubleshooting](docs/99-reference/troubleshooting-simple.md)** - Fix problems
-- **[All Documentation](docs/README.md)** - Everything else
-
-### 💬 Need More Help?
-- **GitHub Issues**: [Report bugs or ask questions](https://github.com/Bissbert/splunk-security-alerts/issues)
-- **Discussions**: [Share experiences and tips](https://github.com/Bissbert/splunk-security-alerts/discussions)
-- **Email**: security-alerts@example.com
-
-### 🔗 Useful Resources
-- [Splunk Docs](https://docs.splunk.com) - Official Splunk documentation
-- [MITRE ATT&CK](https://attack.mitre.org) - Understanding attack techniques
-- [r/Splunk](https://reddit.com/r/splunk) - Community discussions
-
-## 🤝 Contributing
-
-We love contributions! Whether it's:
-- 📝 Fixing typos in documentation
-- 🐛 Reporting bugs
-- 💡 Suggesting new features
-- 🔧 Improving alerts
-- 📚 Adding examples
-
-**How to contribute:**
-1. Fork the repo
-2. Make your changes
-3. Test them
-4. Submit a pull request
-5. We'll review and merge!
-
-## 📊 Success Stories
-
-> "Reduced our false positives by 70% and caught our first real breach within 2 days of deployment!"
-> - *Anonymous SOC Team*
-
-> "The documentation finally made Splunk make sense to our junior analysts."
-> - *Security Manager*
-
-> "Detected cryptominer that was running for months unnoticed. Saved us thousands in cloud costs."
-> - *DevOps Team*
-
-## 📜 License
-
-MIT License - Use freely, modify as needed, share with others!
-
-## 🙏 Special Thanks
-
-- The global SOC community for invaluable feedback
-- MITRE for the ATT&CK framework
-- Splunk for an amazing platform
-- Every analyst who's stayed up late responding to alerts
-
----
-
-**🎉 You're joining thousands of teams protecting their infrastructure!**
-
-📊 **Version**: 3.0.0 (Beginner-Friendly Edition)
-📅 **Updated**: January 2025
-🔗 **Repository**: https://github.com/Bissbert/splunk-security-alerts
-📚 **Documentation**: [Start Here](docs/README.md)
-
-**Remember:** Everyone starts somewhere. You've got this! 🚀
+Start with the [documentation index](docs/README.md), then use the component
+write-ups for the alert lifecycle, configuration flow, enrichment data, and
+operations. Every published measurement is explained in
+[docs/measurement.md](docs/measurement.md).
