@@ -148,7 +148,7 @@ class SearchTester:
         return 0 if len(self.errors) == 0 else 1
 
 def main():
-    config_path = Path(__file__).parent.parent / 'default' / 'savedsearches.conf'
+    config_path = Path(__file__).parent.parent / 'security_alerts_app' / 'default' / 'savedsearches.conf'
 
     if not config_path.exists():
         print(f"Error: Configuration file not found at {config_path}")
