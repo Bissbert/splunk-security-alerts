@@ -14,16 +14,17 @@ echo -e "${GREEN}======================================${NC}"
 echo -e "${GREEN}Splunk Security Alerts - Test Suite${NC}"
 echo -e "${GREEN}======================================${NC}"
 
-# Change to tests directory
-cd "$(dirname "$0")"
+# Resolve paths from the repository root, regardless of the caller's cwd.
+repo_root=$(cd "$(dirname "$0")/.." && pwd)
+cd "$repo_root/tests"
 
 # Test 1: Validate configuration files exist
 echo -e "\n${YELLOW}Test 1: Checking configuration files...${NC}"
 required_files=(
-    "../default/savedsearches.conf"
-    "../default/props.conf"
-    "../default/transforms.conf"
-    "../default/macros.conf"
+    "../security_alerts_app/default/savedsearches.conf"
+    "../security_alerts_app/default/props.conf"
+    "../security_alerts_app/default/transforms.conf"
+    "../security_alerts_app/default/macros.conf"
 )
 
 for file in "${required_files[@]}"; do
@@ -38,11 +39,11 @@ done
 # Test 2: Validate lookup files
 echo -e "\n${YELLOW}Test 2: Checking lookup files...${NC}"
 lookup_files=(
-    "../lookups/authorized_ips.csv"
-    "../lookups/malicious_ips.csv"
-    "../lookups/sensitive_hosts.csv"
-    "../lookups/authorized_users.csv"
-    "../lookups/critical_files.csv"
+    "../security_alerts_app/lookups/authorized_ips.csv"
+    "../security_alerts_app/lookups/malicious_ips.csv"
+    "../security_alerts_app/lookups/sensitive_hosts.csv"
+    "../security_alerts_app/lookups/authorized_users.csv"
+    "../security_alerts_app/lookups/critical_files.csv"
 )
 
 for file in "${lookup_files[@]}"; do
@@ -62,8 +63,8 @@ done
 # Test 3: Validate dashboards
 echo -e "\n${YELLOW}Test 3: Checking dashboards...${NC}"
 dashboard_files=(
-    "../dashboards/security_operations_dashboard.xml"
-    "../dashboards/ssh_monitoring_dashboard.xml"
+    "../security_alerts_app/default/data/ui/views/security_operations_dashboard.xml"
+    "../security_alerts_app/default/data/ui/views/ssh_monitoring_dashboard.xml"
 )
 
 for file in "${dashboard_files[@]}"; do
@@ -91,11 +92,11 @@ fi
 # Test 5: Check for required directories
 echo -e "\n${YELLOW}Test 5: Checking directory structure...${NC}"
 required_dirs=(
-    "../default"
-    "../lookups"
-    "../dashboards"
-    "../scripts"
-    "../documentation"
+    "../security_alerts_app/default"
+    "../security_alerts_app/lookups"
+    "../security_alerts_app/default/data/ui/views"
+    "../deployment"
+    "../docs"
 )
 
 for dir in "${required_dirs[@]}"; do
@@ -108,9 +109,9 @@ done
 
 # Test 6: Validate deployment script
 echo -e "\n${YELLOW}Test 6: Checking deployment script...${NC}"
-if [[ -f "../scripts/deploy.sh" ]]; then
+if [[ -f "../deployment/deploy.sh" ]]; then
     echo -e "  ${GREEN}✓${NC} Deploy script exists"
-    if [[ -x "../scripts/deploy.sh" ]]; then
+    if [[ -x "../deployment/deploy.sh" ]]; then
         echo -e "  ${GREEN}✓${NC} Deploy script is executable"
     else
         echo -e "  ${YELLOW}⚠${NC} Deploy script is not executable"

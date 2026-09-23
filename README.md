@@ -1,4 +1,8 @@
-# Splunk Security Alerts
+# splunk-security-alerts
+
+![GitHub last commit](https://img.shields.io/github/last-commit/Bissbert/splunk-security-alerts)
+
+> Reusable detection-as-code Splunk app — 13 production-tuned saved searches, lookup-driven allowlisting, two dashboards, and incident-response playbooks in one deployable package.
 
 This repository is a Splunk app that turns security-relevant events into
 scheduled saved-search results. It supplies field extractions, reusable search
@@ -31,10 +35,13 @@ flowchart LR
     style A fill:#8250df,stroke:#bc8cff,color:#fff
 ```
 
+## Why
+
+Writing Splunk alerts from scratch means reinventing the same SPL patterns for brute-force, privilege escalation, lateral movement, and data exfiltration over and over. This app provides a version-controlled, CI-tested baseline that you adjust to your environment rather than author from zero. It pairs with [posix-ids](https://github.com/Bissbert/posix-ids), which generates the host-level JSON events that these searches consume.
+
 ## Quick start
 
-From the repository root, inspect the checked-in configuration without a
-Splunk installation:
+Inspect the checked-in configuration without a Splunk installation:
 
 ```sh
 python3 tools/measure_alerts.py
@@ -44,18 +51,39 @@ This command is verified in this checkout. It reads the app's `.conf`, `.csv`,
 and dashboard files and reports the inventory used by the documentation. It
 does not execute SPL or contact Splunk.
 
-To deploy to a real Splunk host, review the secure deployment script first and
-then run it from the repository root on a host where `SPLUNK_HOME` points to an
-installed Splunk instance:
+Deploy to a real Splunk host:
 
-```sh
-./deployment/deploy_secure.sh --no-restart
+```bash
+git clone https://github.com/Bissbert/splunk-security-alerts.git
+cd splunk-security-alerts
+
+# Automated deploy (prompts for Splunk admin password and install path)
+./deployment/deploy_secure.sh
+
+# Manual copy
+cp -r security_alerts_app /opt/splunk/etc/apps/
+chown -R splunk:splunk /opt/splunk/etc/apps/security_alerts_app
+/opt/splunk/bin/splunk restart
+
+# Edit your environment's trusted IPs before enabling alerts
+nano security_alerts_app/lookups/authorized_ips.csv
 ```
 
 The deployment command was not run in this documentation pass because this
 workspace has no Splunk instance. It performs host-level changes, asks for
 credentials, and defaults to writing a log outside the repository. See
 [Operations](docs/operations.md) before using it.
+
+## How it works
+
+- `security_alerts_app/default/savedsearches.conf` — 13 saved searches running on 5- or 10-minute schedules, covering: unauthorized SSH access, privilege escalation, data exfiltration, brute-force login, lateral movement, new admin account creation, C2 communication, persistence mechanisms, port scanning, critical file changes, unusual protocols, credential abuse, and attack chain correlation.
+- `security_alerts_app/default/props.conf` / `transforms.conf` — field extractions and lookup-backed transforms for log normalization.
+- `security_alerts_app/lookups/` — CSV allowlists for authorized IPs, users, scanners, hosts, and known-bad IPs. Edit these to reduce false positives.
+- `security_alerts_app/default/data/ui/views/` — Security Operations Center dashboard and SSH Monitoring dashboard.
+- `security_alerts_app/bin/security_validator.py` — Python helper that validates lookup integrity and configuration on deploy.
+- `security/playbooks/` — incident-response playbooks and a SOC operations runbook.
+- `deployment/deploy_secure.sh` — hardened deploy script with SHA-256 verification and permission enforcement.
+- `tests/test_searches.py` — Python-based search validation; `tests/run_tests.sh` runs the suite.
 
 ## Architecture
 
@@ -74,6 +102,19 @@ The exact relationship between the files is shown in
 | Detection | `default/savedsearches.conf` | Schedules searches for authentication, access, process, persistence, network, integrity, and correlation signals. |
 | Visualization | `default/data/ui/views/*.xml` | Defines the Security Operations and SSH Monitoring dashboards. |
 | Deployment | `deployment/deploy_secure.sh` | Validates, backs up, copies, permissions, and optionally restarts a Splunk app. |
+
+## Configuration
+
+All tuning is done through lookup CSV files and Splunk's saved search threshold parameters:
+
+| File | Purpose |
+|---|---|
+| `lookups/authorized_ips.csv` | IPs that bypass the unauthorized-access alert |
+| `lookups/authorized_users.csv` | Accounts excluded from privilege-escalation checks |
+| `lookups/malicious_ips.csv` | Known-bad IPs used in exfiltration risk scoring |
+| `lookups/sensitive_hosts.csv` | High-value hosts that raise alert severity |
+
+Splunk version 8.0 or later required (Enterprise or Cloud). Logs must be indexed before alerts fire.
 
 ## Measured repository inventory
 
@@ -128,9 +169,10 @@ tools/                   measurement scripts used by this documentation
   operating procedures, not states implemented in these files.
 - Seven lookup references in the configuration do not have matching CSV files.
   The exact names are listed in [Data and enrichment](docs/data-and-enrichment.md).
-- The existing test scripts still use paths from an older app layout and fail
-  before validating the current files. This pass records that failure and does
-  not change application behavior.
+- The test scripts used paths from an older app layout and failed before
+  validating the current files. Those paths were corrected on the default
+  branch after this pass; the suite still validates configuration only and
+  does not execute SPL.
 - The secure deployment script was not run. It requires a live Splunk host,
   suitable permissions, credentials, and host-level tools.
 
@@ -140,3 +182,11 @@ Start with the [documentation index](docs/README.md), then use the component
 write-ups for the alert lifecycle, configuration flow, enrichment data, and
 operations. Every published measurement is explained in
 [docs/measurement.md](docs/measurement.md).
+
+## Status
+
+Actively maintained.
+
+## License
+
+MIT
