@@ -37,6 +37,10 @@ section "python3 tests/test_searches.py"
 python3 tests/test_searches.py
 echo "exit=$?"
 
+section "python3 -m unittest test_validator test_app_files"
+(cd tests && python3 -m unittest -v test_validator test_app_files 2>&1)
+echo "exit=$?"
+
 section "bash tests/run_tests.sh"
 bash tests/run_tests.sh >/tmp/rt.log 2>&1
 rc=$?
