@@ -149,7 +149,7 @@ test_suppression_fields_are_set (test_app_files.SavedSearchesTest.test_suppressi
 test_thirteen_searches (test_app_files.SavedSearchesTest.test_thirteen_searches) ... ok
 
 ----------------------------------------------------------------------
-Ran 27 tests in 0.012s
+Ran 27 tests in 0.011s
 
 OK
 exit=0
@@ -272,7 +272,7 @@ test_suppression_fields_are_set (test_app_files.SavedSearchesTest.test_suppressi
 test_thirteen_searches (test_app_files.SavedSearchesTest.test_thirteen_searches) ... ok
 
 ----------------------------------------------------------------------
-Ran 27 tests in 0.011s
+Ran 27 tests in 0.012s
 
 OK
 
@@ -289,7 +289,7 @@ Test 6: Checking deployment script...
 
 Test 7: Checking documentation...
   ✓ README.md exists
-  ✓ README appears comprehensive (193 lines)
+  ✓ README appears comprehensive (192 lines)
 
 ======================================
 Test suite completed!
