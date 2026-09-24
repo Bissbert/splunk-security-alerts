@@ -50,15 +50,13 @@ repository's own tests:
 
 ```sh
 python3 tests/test_searches.py
+python3 -m unittest test_validator test_app_files   # from tests/
 bash tests/run_tests.sh
 ```
 
-The measurement script, the syntax checks and the compile succeed. Both tests
-load the current files and validate all 13 searches, and both exit 1: the
-bracket check flags a valid escaped bracket inside a quoted regex in
-**Privilege Escalation Detected**, and the validator then reports every later
-search as failed. These are open entries 3 and 4 in
-[Bugs found](BUGS-FOUND.md). The output is in
+Everything succeeds. The validator reports 13 of 13 searches valid with three
+warnings, the 27 unit tests pass, and both test entry points exit 0. To run
+only the test suite, use `sh tests/docker.sh`. The output is in
 [How measurements were made](measurement.md#scripts-and-tests).
 
 ## Dashboards

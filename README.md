@@ -83,7 +83,7 @@ credentials, and defaults to writing a log outside the repository. See
 - `security_alerts_app/bin/security_validator.py` — Python helper that validates lookup integrity and configuration on deploy.
 - `security/playbooks/` — incident-response playbooks and a SOC operations runbook.
 - `deployment/deploy_secure.sh` — hardened deploy script with SHA-256 verification and permission enforcement.
-- `tests/test_searches.py` — Python-based search validation; `tests/run_tests.sh` runs the suite.
+- `tests/test_searches.py` — Python-based search validation; `tests/test_validator.py` and `tests/test_app_files.py` are unit tests for the validator and the app files; `tests/run_tests.sh` runs the suite and `tests/docker.sh` runs it in a Linux container.
 
 ## Architecture
 
@@ -171,9 +171,7 @@ tools/                   measurement script and the Linux container run
 - Seven lookup references in the configuration do not have matching CSV files.
   The exact names are listed in [Data and enrichment](docs/data-and-enrichment.md).
 - The tests validate configuration only and do not execute SPL. Both test
-  entry points currently exit 1 on a false positive in the bracket check, and
-  the validator marks every search after the first error as failed (open
-  entries 3 and 4 in [Bugs found](docs/BUGS-FOUND.md)).
+  entry points exit 0 with all 13 searches valid.
 - The secure deployment script was not run. It requires a live Splunk host,
   suitable permissions, credentials, and host-level tools.
 
