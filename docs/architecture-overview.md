@@ -41,7 +41,7 @@ flowchart TB
 
 ## Configuration boundaries
 
-| File | Role in the flow | Measured stanzas |
+| File | Role in the flow | Stanzas |
 |---|---|---:|
 | `default/props.conf` | Parses event formats and creates aliases or calculated fields. | 14 |
 | `default/transforms.conf` | Defines lookups and regular-expression transforms, including routing and classification rules. | 42 |

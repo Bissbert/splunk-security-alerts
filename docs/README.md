@@ -10,8 +10,7 @@ when investigating a rule and the operations page when deploying it.
 | [Alert reference](alert-reference.md) | Implemented alert lifecycle, severity and routing matrix, and one row per alert. |
 | [Data and enrichment](data-and-enrichment.md) | Props, transforms, macros, lookup files, and missing lookup references. |
 | [Operations](operations.md) | Deployment flow, source-only checks, dashboards, and current validation limits. |
-| [Measurement](measurement.md) | Every reported number, the command that produced it, and what could not be run. |
-| [Bugs found](BUGS-FOUND.md) | Tracked defects recorded without changing source behavior. |
+| [Measurement](measurement.md) | The Linux container run: every reported number, the test results, and what was not covered. |
 
 Numbers in the component write-ups are measurements of repository files unless
 they are explicitly marked as unmeasured. The measurement script has no

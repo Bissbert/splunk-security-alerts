@@ -85,6 +85,7 @@ done
 echo -e "\n${YELLOW}Test 4: Running Python validation tests...${NC}"
 if command -v python3 &> /dev/null; then
     python3 test_searches.py
+    python3 -m unittest -v test_validator test_app_files
 else
     echo -e "  ${YELLOW}⚠${NC} Python3 not found, skipping validation tests"
 fi

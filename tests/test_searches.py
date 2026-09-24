@@ -9,6 +9,45 @@ import sys
 import configparser
 from pathlib import Path
 
+
+def scan_spl(query):
+    """Return (text outside double-quoted strings, whether a quote is left open).
+
+    A backslash inside a quoted string escapes the next character, so the
+    regex "su\\[.*" and an escaped quote \\" stay inside the string.
+    """
+    outside = []
+    in_string = False
+    i = 0
+    while i < len(query):
+        ch = query[i]
+        if in_string:
+            if ch == '\\':
+                i += 2
+                continue
+            if ch == '"':
+                in_string = False
+        elif ch == '"':
+            in_string = True
+        else:
+            outside.append(ch)
+        i += 1
+    return ''.join(outside), in_string
+
+
+def unbalanced(text, open_ch, close_ch):
+    """True when close_ch appears before its open_ch or the counts differ."""
+    depth = 0
+    for ch in text:
+        if ch == open_ch:
+            depth += 1
+        elif ch == close_ch:
+            depth -= 1
+            if depth < 0:
+                return True
+    return depth != 0
+
+
 class SearchTester:
     def __init__(self, config_path):
         self.config_path = Path(config_path)
@@ -22,22 +61,23 @@ class SearchTester:
         return config
 
     def validate_search_syntax(self, search_name, search_query):
-        """Validate SPL syntax basics"""
-        # Check for common syntax issues
+        """Validate SPL syntax basics; True when this search added no errors"""
+        errors_before = len(self.errors)
+
         if not search_query:
             self.errors.append(f"{search_name}: Empty search query")
             return False
 
-        # Check for balanced quotes
-        if search_query.count('"') % 2 != 0:
+        # Brackets inside quoted strings (regexes, literals) are not SPL syntax.
+        outside, open_quote = scan_spl(search_query)
+        if open_quote:
             self.errors.append(f"{search_name}: Unbalanced quotes in search")
 
-        # Check for balanced parentheses
-        if search_query.count('(') != search_query.count(')'):
+        if unbalanced(outside, '(', ')'):
             self.errors.append(f"{search_name}: Unbalanced parentheses")
 
-        # Check for balanced square brackets
-        if search_query.count('[') != search_query.count(']'):
+        # Square brackets outside quotes delimit subsearches.
+        if unbalanced(outside, '[', ']'):
             self.errors.append(f"{search_name}: Unbalanced square brackets")
 
         # Check for required index specification
@@ -49,7 +89,7 @@ class SearchTester:
             if 'bin _time' in search_query or 'timechart' in search_query:
                 self.warnings.append(f"{search_name}: Time-based command without explicit time range")
 
-        return len(self.errors) == 0
+        return len(self.errors) == errors_before
 
     def validate_required_fields(self, search_name, config_section):
         """Validate required configuration fields"""

@@ -94,4 +94,4 @@ some of these files from another app or local configuration was not verified.
 The app defines aliases and macros for common fields, but the saved searches
 also normalize fields locally. A deployment therefore needs event data whose
 sourcetypes and field names match the assumptions in both `props.conf` and the
-individual search. This pass did not execute SPL against sample events.
+individual search. SPL was not executed against sample events.

@@ -1,0 +1,297 @@
+
+=== environment
+Linux 6.5.11-linuxkit aarch64
+Python 3.12.14
+GNU bash, version 5.2.15(1)-release (aarch64-unknown-linux-gnu)
+xmllint: using libxml version 20914
+
+=== python3 tools/measure_alerts.py
+repository=/tmp/sa
+saved_searches=13
+static_severity_counts=3:4,4:5,5:4
+schedule_counts=*/10 * * * *:3,*/15 * * * *:2,*/30 * * * *:2,*/5 * * * *:6
+suppressed_searches=6
+tracked_searches=13
+action_notable_enabled=1
+action_notable_names=Unauthorized SSH Access from Unknown IPs
+action_email_enabled=0
+action_script_enabled=0
+alerts:
+  Unauthorized SSH Access from Unknown IPs | static=5 | cron=*/5 * * * * | window=-5m..now | dynamic=critical | route=notable | suppression=1 | lookup=authorized_ips.csv
+  Privilege Escalation Detected | static=5 | cron=*/5 * * * * | window=-5m..now | dynamic=critical | route=none-configured | suppression=1 | lookup=authorized_users.csv
+  Data Exfiltration Attempt | static=5 | cron=*/10 * * * * | window=-10m..now | dynamic=critical | route=none-configured | suppression=0 | lookup=malicious_ips.csv
+  Persistence Mechanism Created | static=4 | cron=*/5 * * * * | window=-5m..now | dynamic=critical,high,medium | route=none-configured | suppression=0 | lookup=sensitive_hosts.csv
+  Lateral Movement Detected | static=4 | cron=*/15 * * * * | window=-15m..now | dynamic=high | route=none-configured | suppression=1 | lookup=none
+  Account Manipulation | static=4 | cron=*/10 * * * * | window=-10m..now | dynamic=none | route=none-configured | suppression=0 | lookup=authorized_users.csv
+  Command and Control Beacon | static=4 | cron=*/30 * * * * | window=-1h..now | dynamic=critical,high | route=none-configured | suppression=0 | lookup=malicious_ips.csv
+  Suspicious Process Execution | static=4 | cron=*/5 * * * * | window=-5m..now | dynamic=high | route=none-configured | suppression=1 | lookup=none
+  Failed Authentication Spike | static=3 | cron=*/5 * * * * | window=-5m..now | dynamic=high,low,medium | route=none-configured | suppression=1 | lookup=malicious_ips.csv
+  Port Scanning Activity | static=3 | cron=*/5 * * * * | window=-5m..now | dynamic=medium | route=none-configured | suppression=1 | lookup=authorized_scanners.csv
+  Unusual Network Protocol | static=3 | cron=*/15 * * * * | window=-15m..now | dynamic=medium | route=none-configured | suppression=0 | lookup=standard_protocols.csv
+  File Integrity Violation | static=3 | cron=*/10 * * * * | window=-10m..now | dynamic=high,medium | route=none-configured | suppression=0 | lookup=critical_files.csv
+  Multi-Stage Attack Chain | static=5 | cron=*/30 * * * * | window=-2h..now | dynamic=critical | route=none-configured | suppression=0 | lookup=none
+lookup_files=7
+  authorized_ips.csv | columns=4 | data_rows=7
+  authorized_scanners.csv | columns=4 | data_rows=3
+  authorized_users.csv | columns=5 | data_rows=10
+  critical_files.csv | columns=4 | data_rows=15
+  malicious_ips.csv | columns=6 | data_rows=5
+  sensitive_hosts.csv | columns=6 | data_rows=10
+  standard_protocols.csv | columns=4 | data_rows=10
+macros.conf_stanzas=24
+props.conf_stanzas=14
+transforms.conf_stanzas=42
+dashboard_views=2
+  security_operations_dashboard.xml | panels=10
+  ssh_monitoring_dashboard.xml | panels=12
+lookup_references=14
+missing_lookup_references=blocked_ips.csv, container_metadata.csv, data_classification.csv, file_hashes.csv, mitre_attack_mapping.csv, risk_scores.csv, windows_event_codes.csv
+
+=== bash -n on every shell script
+ok  deployment/deploy.sh
+ok  deployment/deploy_secure.sh
+ok  scripts/install-hooks.sh
+ok  scripts/package-splunk-app.sh
+ok  tests/run_tests.sh
+
+=== compile security_alerts_app/bin/security_validator.py
+ok
+
+=== python3 tests/test_searches.py
+============================================================
+Splunk Security Alerts - Search Validation
+============================================================
+
+Validating: Unauthorized SSH Access from Unknown IPs
+  ✓ Search syntax valid
+
+Validating: Privilege Escalation Detected
+  ✓ Search syntax valid
+
+Validating: Data Exfiltration Attempt
+  ✓ Search syntax valid
+
+Validating: Persistence Mechanism Created
+  ✓ Search syntax valid
+
+Validating: Lateral Movement Detected
+  ✓ Search syntax valid
+
+Validating: Account Manipulation
+  ✓ Search syntax valid
+
+Validating: Command and Control Beacon
+  ✓ Search syntax valid
+
+Validating: Suspicious Process Execution
+  ✓ Search syntax valid
+
+Validating: Failed Authentication Spike
+  ✓ Search syntax valid
+
+Validating: Port Scanning Activity
+  ✓ Search syntax valid
+
+Validating: Unusual Network Protocol
+  ✓ Search syntax valid
+
+Validating: File Integrity Violation
+  ✓ Search syntax valid
+
+Validating: Multi-Stage Attack Chain
+  ✓ Search syntax valid
+
+============================================================
+SUMMARY
+============================================================
+Total searches: 13
+Valid searches: 13
+Errors: 0
+Warnings: 3
+
+============================================================
+WARNINGS
+============================================================
+  ⚠ Command and Control Beacon: Time-based command without explicit time range
+  ⚠ Failed Authentication Spike: Time-based command without explicit time range
+  ⚠ Port Scanning Activity: Time-based command without explicit time range
+
+============================================================
+exit=0
+
+=== python3 -m unittest test_validator test_app_files
+test_bad_severity_and_missing_lookup_warn (test_validator.ConfigRunTest.test_bad_severity_and_missing_lookup_warn) ... ok
+test_counts_only_the_broken_search (test_validator.ConfigRunTest.test_counts_only_the_broken_search) ... ok
+test_missing_fields_and_bad_cron (test_validator.ConfigRunTest.test_missing_fields_and_bad_cron) ... ok
+test_valid_config_exits_0 (test_validator.ConfigRunTest.test_valid_config_exits_0) ... ok
+test_later_search_passes_after_an_earlier_error (test_validator.PerSearchResultTest.test_later_search_passes_after_an_earlier_error) ... ok
+test_drops_quoted_text (test_validator.ScanSplTest.test_drops_quoted_text) ... ok
+test_escaped_bracket_in_regex (test_validator.ScanSplTest.test_escaped_bracket_in_regex) ... ok
+test_escaped_quote_stays_inside_string (test_validator.ScanSplTest.test_escaped_quote_stays_inside_string) ... ok
+test_reports_open_quote (test_validator.ScanSplTest.test_reports_open_quote) ... ok
+test_all_shipped_searches_are_valid (test_validator.ShippedConfigTest.test_all_shipped_searches_are_valid) ... ok
+test_bracket_inside_quoted_regex_is_valid (test_validator.SyntaxCheckTest.test_bracket_inside_quoted_regex_is_valid) ... ok
+test_close_before_open (test_validator.SyntaxCheckTest.test_close_before_open) ... ok
+test_empty_search (test_validator.SyntaxCheckTest.test_empty_search) ... ok
+test_missing_index_warns (test_validator.SyntaxCheckTest.test_missing_index_warns) ... ok
+test_paren_inside_quoted_string_is_valid (test_validator.SyntaxCheckTest.test_paren_inside_quoted_string_is_valid) ... ok
+test_subsearch_brackets_are_valid (test_validator.SyntaxCheckTest.test_subsearch_brackets_are_valid) ... ok
+test_unbalanced_subsearch_bracket (test_validator.SyntaxCheckTest.test_unbalanced_subsearch_bracket) ... ok
+test_unterminated_quote (test_validator.SyntaxCheckTest.test_unterminated_quote) ... ok
+test_valid_search (test_validator.SyntaxCheckTest.test_valid_search) ... ok
+test_conf_files_parse (test_app_files.ConfFilesTest.test_conf_files_parse) ... ok
+test_dashboards_parse (test_app_files.DashboardsTest.test_dashboards_parse) ... ok
+test_every_csv_has_a_header_and_even_rows (test_app_files.LookupFilesTest.test_every_csv_has_a_header_and_even_rows) ... ok
+test_search_lookup_fields_exist_in_the_csv (test_app_files.LookupFilesTest.test_search_lookup_fields_exist_in_the_csv) ... ok
+test_lookups_used_by_searches_are_shipped (test_app_files.SavedSearchesTest.test_lookups_used_by_searches_are_shipped) ... ok
+test_severity_and_dispatch_window (test_app_files.SavedSearchesTest.test_severity_and_dispatch_window) ... ok
+test_suppression_fields_are_set (test_app_files.SavedSearchesTest.test_suppression_fields_are_set) ... ok
+test_thirteen_searches (test_app_files.SavedSearchesTest.test_thirteen_searches) ... ok
+
+----------------------------------------------------------------------
+Ran 27 tests in 1.889s
+
+OK
+exit=0
+
+=== bash tests/run_tests.sh
+======================================
+Splunk Security Alerts - Test Suite
+======================================
+
+Test 1: Checking configuration files...
+  ✓ ../security_alerts_app/default/savedsearches.conf exists
+  ✓ ../security_alerts_app/default/props.conf exists
+  ✓ ../security_alerts_app/default/transforms.conf exists
+  ✓ ../security_alerts_app/default/macros.conf exists
+
+Test 2: Checking lookup files...
+  ✓ ../security_alerts_app/lookups/authorized_ips.csv exists
+    ✓ Valid CSV format
+  ✓ ../security_alerts_app/lookups/malicious_ips.csv exists
+    ✓ Valid CSV format
+  ✓ ../security_alerts_app/lookups/sensitive_hosts.csv exists
+    ✓ Valid CSV format
+  ✓ ../security_alerts_app/lookups/authorized_users.csv exists
+    ✓ Valid CSV format
+  ✓ ../security_alerts_app/lookups/critical_files.csv exists
+    ✓ Valid CSV format
+
+Test 3: Checking dashboards...
+  ✓ ../security_alerts_app/default/data/ui/views/security_operations_dashboard.xml exists
+    ✓ Valid XML format
+  ✓ ../security_alerts_app/default/data/ui/views/ssh_monitoring_dashboard.xml exists
+    ✓ Valid XML format
+
+Test 4: Running Python validation tests...
+============================================================
+Splunk Security Alerts - Search Validation
+============================================================
+
+Validating: Unauthorized SSH Access from Unknown IPs
+  ✓ Search syntax valid
+
+Validating: Privilege Escalation Detected
+  ✓ Search syntax valid
+
+Validating: Data Exfiltration Attempt
+  ✓ Search syntax valid
+
+Validating: Persistence Mechanism Created
+  ✓ Search syntax valid
+
+Validating: Lateral Movement Detected
+  ✓ Search syntax valid
+
+Validating: Account Manipulation
+  ✓ Search syntax valid
+
+Validating: Command and Control Beacon
+  ✓ Search syntax valid
+
+Validating: Suspicious Process Execution
+  ✓ Search syntax valid
+
+Validating: Failed Authentication Spike
+  ✓ Search syntax valid
+
+Validating: Port Scanning Activity
+  ✓ Search syntax valid
+
+Validating: Unusual Network Protocol
+  ✓ Search syntax valid
+
+Validating: File Integrity Violation
+  ✓ Search syntax valid
+
+Validating: Multi-Stage Attack Chain
+  ✓ Search syntax valid
+
+============================================================
+SUMMARY
+============================================================
+Total searches: 13
+Valid searches: 13
+Errors: 0
+Warnings: 3
+
+============================================================
+WARNINGS
+============================================================
+  ⚠ Command and Control Beacon: Time-based command without explicit time range
+  ⚠ Failed Authentication Spike: Time-based command without explicit time range
+  ⚠ Port Scanning Activity: Time-based command without explicit time range
+
+============================================================
+test_bad_severity_and_missing_lookup_warn (test_validator.ConfigRunTest.test_bad_severity_and_missing_lookup_warn) ... ok
+test_counts_only_the_broken_search (test_validator.ConfigRunTest.test_counts_only_the_broken_search) ... ok
+test_missing_fields_and_bad_cron (test_validator.ConfigRunTest.test_missing_fields_and_bad_cron) ... ok
+test_valid_config_exits_0 (test_validator.ConfigRunTest.test_valid_config_exits_0) ... ok
+test_later_search_passes_after_an_earlier_error (test_validator.PerSearchResultTest.test_later_search_passes_after_an_earlier_error) ... ok
+test_drops_quoted_text (test_validator.ScanSplTest.test_drops_quoted_text) ... ok
+test_escaped_bracket_in_regex (test_validator.ScanSplTest.test_escaped_bracket_in_regex) ... ok
+test_escaped_quote_stays_inside_string (test_validator.ScanSplTest.test_escaped_quote_stays_inside_string) ... ok
+test_reports_open_quote (test_validator.ScanSplTest.test_reports_open_quote) ... ok
+test_all_shipped_searches_are_valid (test_validator.ShippedConfigTest.test_all_shipped_searches_are_valid) ... ok
+test_bracket_inside_quoted_regex_is_valid (test_validator.SyntaxCheckTest.test_bracket_inside_quoted_regex_is_valid) ... ok
+test_close_before_open (test_validator.SyntaxCheckTest.test_close_before_open) ... ok
+test_empty_search (test_validator.SyntaxCheckTest.test_empty_search) ... ok
+test_missing_index_warns (test_validator.SyntaxCheckTest.test_missing_index_warns) ... ok
+test_paren_inside_quoted_string_is_valid (test_validator.SyntaxCheckTest.test_paren_inside_quoted_string_is_valid) ... ok
+test_subsearch_brackets_are_valid (test_validator.SyntaxCheckTest.test_subsearch_brackets_are_valid) ... ok
+test_unbalanced_subsearch_bracket (test_validator.SyntaxCheckTest.test_unbalanced_subsearch_bracket) ... ok
+test_unterminated_quote (test_validator.SyntaxCheckTest.test_unterminated_quote) ... ok
+test_valid_search (test_validator.SyntaxCheckTest.test_valid_search) ... ok
+test_conf_files_parse (test_app_files.ConfFilesTest.test_conf_files_parse) ... ok
+test_dashboards_parse (test_app_files.DashboardsTest.test_dashboards_parse) ... ok
+test_every_csv_has_a_header_and_even_rows (test_app_files.LookupFilesTest.test_every_csv_has_a_header_and_even_rows) ... ok
+test_search_lookup_fields_exist_in_the_csv (test_app_files.LookupFilesTest.test_search_lookup_fields_exist_in_the_csv) ... ok
+test_lookups_used_by_searches_are_shipped (test_app_files.SavedSearchesTest.test_lookups_used_by_searches_are_shipped) ... ok
+test_severity_and_dispatch_window (test_app_files.SavedSearchesTest.test_severity_and_dispatch_window) ... ok
+test_suppression_fields_are_set (test_app_files.SavedSearchesTest.test_suppression_fields_are_set) ... ok
+test_thirteen_searches (test_app_files.SavedSearchesTest.test_thirteen_searches) ... ok
+
+----------------------------------------------------------------------
+Ran 27 tests in 1.440s
+
+OK
+
+Test 5: Checking directory structure...
+  ✓ ../security_alerts_app/default exists
+  ✓ ../security_alerts_app/lookups exists
+  ✓ ../security_alerts_app/default/data/ui/views exists
+  ✓ ../deployment exists
+  ✓ ../docs exists
+
+Test 6: Checking deployment script...
+  ✓ Deploy script exists
+  ✓ Deploy script is executable
+
+Test 7: Checking documentation...
+  ✓ README.md exists
+  ✓ README appears comprehensive (191 lines)
+
+======================================
+Test suite completed!
+======================================
+exit=0

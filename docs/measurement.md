@@ -2,10 +2,31 @@
 
 # How measurements were made
 
-The repository has no Splunk instance or sample event corpus in this
-workspace. The measurements in the documentation are therefore measurements of
-checked-in files, not search execution, alert volume, latency, or detection
-quality.
+Every number in this documentation comes from one script that runs in a Linux
+container:
+
+```sh
+sh tools/linux-run.sh > media/captures/linux-run.txt
+```
+
+[`tools/linux-run.sh`](../tools/linux-run.sh) starts `python:3.12-slim-bookworm`,
+mounts the repository read-only, copies it, and runs the measurement script,
+a syntax check of every shell script, a compile of the validator helper, the
+unit tests and both test entry points. The full
+output is [`media/captures/linux-run.txt`](../media/captures/linux-run.txt).
+
+No Splunk instance runs. The official image only starts after its license is
+accepted, so the numbers describe checked-in files, not search execution,
+alert volume, latency or detection quality.
+
+## Environment
+
+| | |
+|---|---|
+| Kernel | Linux 6.5.11-linuxkit, aarch64 (Docker Desktop VM) |
+| Image | `python:3.12-slim-bookworm` (`sha256:392307d2…23564e`), Python 3.12.14 |
+| Tools | GNU bash 5.2.15, xmllint (libxml 2.9.14) |
+| Date | 2026-09-24 |
 
 ## The measurement script
 
@@ -28,15 +49,9 @@ flowchart LR
     style D fill:#8250df,stroke:#bc8cff,color:#fff
 ```
 
-Run it from the repository root:
+## Results
 
-```sh
-python3 tools/measure_alerts.py
-```
-
-## Recorded source results
-
-The command run for this pass reported:
+`python3 tools/measure_alerts.py` reported:
 
 | Measurement | Result |
 |---|---:|
@@ -62,27 +77,33 @@ flag, and saved-search lookup references. The per-alert table in
 [Alert reference](alert-reference.md) is based on that output plus the search
 expressions themselves.
 
-## Other commands actually run
+## Scripts and tests
 
-These source checks were also run:
-
-| Command | Result |
+| Check | Result |
 |---|---|
-| `bash -n deployment/deploy.sh deployment/deploy_secure.sh scripts/install-hooks.sh scripts/package-splunk-app.sh tests/run_tests.sh` | Passed. |
-| In-memory `compile()` of `tests/test_searches.py` and `security_alerts_app/bin/security_validator.py` | Both passed; no bytecode was written. |
-| `python3 tests/test_searches.py` | Failed before validation because it looks for `default/savedsearches.conf`. |
-| `bash tests/run_tests.sh` | Failed at its first path check for `../default/savedsearches.conf`. |
+| `bash -n` on `deployment/deploy.sh`, `deployment/deploy_secure.sh`, `scripts/install-hooks.sh`, `scripts/package-splunk-app.sh`, `tests/run_tests.sh` | All pass. |
+| In-memory `compile()` of `security_alerts_app/bin/security_validator.py` | Passes. |
+| `python3 tests/test_searches.py` | Loads and validates all 13 searches. 13 valid, 0 errors, 3 warnings, exit 0. |
+| `python3 -m unittest test_validator test_app_files` | 27 tests, OK, exit 0. |
+| `bash tests/run_tests.sh` | Finds all configuration files, lookups and dashboards; both dashboards pass `xmllint`; the Python validation and the unit tests pass. Exit 0. |
 
-The two failures are documented, with file and line references and proposed
-unapplied diffs, in [Bugs found](BUGS-FOUND.md).
+The unit tests include a regression test for each fixed bug:
+[#4](https://github.com/Bissbert/splunk-security-alerts/issues/4) (errors from one search failed every later search),
+[#5](https://github.com/Bissbert/splunk-security-alerts/issues/5) (brackets inside quoted text counted as unbalanced) and
+[#6](https://github.com/Bissbert/splunk-security-alerts/issues/6) (a lookup on a column `malicious_ips.csv` does not have).
 
-## Not measured
+The three warnings say that **Command and Control Beacon**, **Failed
+Authentication Spike** and **Port Scanning Activity** use a time-based command
+without an explicit time range. Each of them sets its window with
+`dispatch.earliest_time` (`-1h`, `-5m` and `-5m`), which the validator does not
+read.
 
-- SPL execution against real events.
-- Whether any alert fires for a representative attack or benign event.
+## Not covered
+
+- SPL execution against real events, and whether any alert fires for a
+  representative attack or benign event. This needs a Splunk instance, whose
+  license was not accepted for this run.
 - False-positive or false-negative rates.
-- Alert latency, search runtime, indexing capacity, or dashboard performance.
+- Alert latency, search runtime, indexing capacity, or dashboard rendering.
 - Deployment success, Splunk version compatibility, restart behavior, or
-  authentication.
-- A terminal capture or animation. No animations are shipped because a real
-  Splunk run was not available; the diagrams are source-derived.
+  authentication. The deployment scripts were syntax-checked only.
