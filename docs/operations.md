@@ -33,42 +33,33 @@ flowchart TD
 verification, and restart. It also writes a timestamped log under `/var/log`,
 asks for credentials during verification unless `SPLUNK_AUTH` is supplied, and
 expects a real Splunk home. Those side effects are why the deployment command
-was not run in this documentation workspace.
+is only syntax-checked here.
 
-## Source-only verification
+## Checks in a Linux container
 
-The following checks were run from the repository root:
+`tools/linux-run.sh` runs every check that does not need Splunk in a
+`python:3.12-slim-bookworm` container:
 
 ```sh
-python3 tools/measure_alerts.py
-bash -n deployment/deploy.sh deployment/deploy_secure.sh \
-  scripts/install-hooks.sh scripts/package-splunk-app.sh tests/run_tests.sh
-python3 - <<'PY'
-from pathlib import Path
-for path in [Path("tests/test_searches.py"),
-             Path("security_alerts_app/bin/security_validator.py")]:
-    compile(path.read_text(), str(path), "exec")
-    print(f"OK {path}")
-PY
+sh tools/linux-run.sh
 ```
 
-The measurement script completed successfully. Shell parsing returned success,
-and both Python files compiled in memory. No bytecode or build output was
-written by the Python syntax check.
-
-## Existing test commands
-
-The repository's existing tests were run as written:
+It runs `tools/measure_alerts.py`, `bash -n` on the five shell scripts,
+compiles `security_alerts_app/bin/security_validator.py`, and runs the
+repository's own tests:
 
 ```sh
 python3 tests/test_searches.py
 bash tests/run_tests.sh
 ```
 
-Both exit before validating searches because they use paths from an older
-layout. The exact file and line references, reproduction output, and proposed
-but unapplied diffs are in [Bugs found](BUGS-FOUND.md). This pass does not
-modify those tracked test files.
+The measurement script, the syntax checks and the compile succeed. Both tests
+load the current files and validate all 13 searches, and both exit 1: the
+bracket check flags a valid escaped bracket inside a quoted regex in
+**Privilege Escalation Detected**, and the validator then reports every later
+search as failed. These are open entries 3 and 4 in
+[Bugs found](BUGS-FOUND.md). The output is in
+[How measurements were made](measurement.md#scripts-and-tests).
 
 ## Dashboards
 

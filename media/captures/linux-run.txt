@@ -1,0 +1,221 @@
+
+=== environment
+Linux 6.5.11-linuxkit aarch64
+Python 3.12.14
+GNU bash, version 5.2.15(1)-release (aarch64-unknown-linux-gnu)
+xmllint: using libxml version 20914
+
+=== python3 tools/measure_alerts.py
+repository=/tmp/sa
+saved_searches=13
+static_severity_counts=3:4,4:5,5:4
+schedule_counts=*/10 * * * *:3,*/15 * * * *:2,*/30 * * * *:2,*/5 * * * *:6
+suppressed_searches=6
+tracked_searches=13
+action_notable_enabled=1
+action_notable_names=Unauthorized SSH Access from Unknown IPs
+action_email_enabled=0
+action_script_enabled=0
+alerts:
+  Unauthorized SSH Access from Unknown IPs | static=5 | cron=*/5 * * * * | window=-5m..now | dynamic=critical | route=notable | suppression=1 | lookup=authorized_ips.csv
+  Privilege Escalation Detected | static=5 | cron=*/5 * * * * | window=-5m..now | dynamic=critical | route=none-configured | suppression=1 | lookup=authorized_users.csv
+  Data Exfiltration Attempt | static=5 | cron=*/10 * * * * | window=-10m..now | dynamic=critical | route=none-configured | suppression=0 | lookup=malicious_ips.csv
+  Persistence Mechanism Created | static=4 | cron=*/5 * * * * | window=-5m..now | dynamic=critical,high,medium | route=none-configured | suppression=0 | lookup=sensitive_hosts.csv
+  Lateral Movement Detected | static=4 | cron=*/15 * * * * | window=-15m..now | dynamic=high | route=none-configured | suppression=1 | lookup=none
+  Account Manipulation | static=4 | cron=*/10 * * * * | window=-10m..now | dynamic=none | route=none-configured | suppression=0 | lookup=authorized_users.csv
+  Command and Control Beacon | static=4 | cron=*/30 * * * * | window=-1h..now | dynamic=critical,high | route=none-configured | suppression=0 | lookup=malicious_ips.csv
+  Suspicious Process Execution | static=4 | cron=*/5 * * * * | window=-5m..now | dynamic=high | route=none-configured | suppression=1 | lookup=none
+  Failed Authentication Spike | static=3 | cron=*/5 * * * * | window=-5m..now | dynamic=high,low,medium | route=none-configured | suppression=1 | lookup=malicious_ips.csv
+  Port Scanning Activity | static=3 | cron=*/5 * * * * | window=-5m..now | dynamic=medium | route=none-configured | suppression=1 | lookup=authorized_scanners.csv
+  Unusual Network Protocol | static=3 | cron=*/15 * * * * | window=-15m..now | dynamic=medium | route=none-configured | suppression=0 | lookup=standard_protocols.csv
+  File Integrity Violation | static=3 | cron=*/10 * * * * | window=-10m..now | dynamic=high,medium | route=none-configured | suppression=0 | lookup=critical_files.csv
+  Multi-Stage Attack Chain | static=5 | cron=*/30 * * * * | window=-2h..now | dynamic=critical | route=none-configured | suppression=0 | lookup=none
+lookup_files=7
+  authorized_ips.csv | columns=4 | data_rows=7
+  authorized_scanners.csv | columns=4 | data_rows=3
+  authorized_users.csv | columns=5 | data_rows=10
+  critical_files.csv | columns=4 | data_rows=15
+  malicious_ips.csv | columns=6 | data_rows=5
+  sensitive_hosts.csv | columns=6 | data_rows=10
+  standard_protocols.csv | columns=4 | data_rows=10
+macros.conf_stanzas=24
+props.conf_stanzas=14
+transforms.conf_stanzas=42
+dashboard_views=2
+  security_operations_dashboard.xml | panels=10
+  ssh_monitoring_dashboard.xml | panels=12
+lookup_references=14
+missing_lookup_references=blocked_ips.csv, container_metadata.csv, data_classification.csv, file_hashes.csv, mitre_attack_mapping.csv, risk_scores.csv, windows_event_codes.csv
+
+=== bash -n on every shell script
+ok  deployment/deploy.sh
+ok  deployment/deploy_secure.sh
+ok  scripts/install-hooks.sh
+ok  scripts/package-splunk-app.sh
+ok  tests/run_tests.sh
+
+=== compile security_alerts_app/bin/security_validator.py
+ok
+
+=== python3 tests/test_searches.py
+============================================================
+Splunk Security Alerts - Search Validation
+============================================================
+
+Validating: Unauthorized SSH Access from Unknown IPs
+  ✓ Search syntax valid
+
+Validating: Privilege Escalation Detected
+  ✗ Search syntax errors found
+
+Validating: Data Exfiltration Attempt
+  ✗ Search syntax errors found
+
+Validating: Persistence Mechanism Created
+  ✗ Search syntax errors found
+
+Validating: Lateral Movement Detected
+  ✗ Search syntax errors found
+
+Validating: Account Manipulation
+  ✗ Search syntax errors found
+
+Validating: Command and Control Beacon
+  ✗ Search syntax errors found
+
+Validating: Suspicious Process Execution
+  ✗ Search syntax errors found
+
+Validating: Failed Authentication Spike
+  ✗ Search syntax errors found
+
+Validating: Port Scanning Activity
+  ✗ Search syntax errors found
+
+Validating: Unusual Network Protocol
+  ✗ Search syntax errors found
+
+Validating: File Integrity Violation
+  ✗ Search syntax errors found
+
+Validating: Multi-Stage Attack Chain
+  ✗ Search syntax errors found
+
+============================================================
+SUMMARY
+============================================================
+Total searches: 13
+Valid searches: 1
+Errors: 1
+Warnings: 3
+
+============================================================
+ERRORS
+============================================================
+  ✗ Privilege Escalation Detected: Unbalanced square brackets
+
+============================================================
+WARNINGS
+============================================================
+  ⚠ Command and Control Beacon: Time-based command without explicit time range
+  ⚠ Failed Authentication Spike: Time-based command without explicit time range
+  ⚠ Port Scanning Activity: Time-based command without explicit time range
+
+============================================================
+exit=1
+
+=== bash tests/run_tests.sh
+======================================
+Splunk Security Alerts - Test Suite
+======================================
+
+Test 1: Checking configuration files...
+  ✓ ../security_alerts_app/default/savedsearches.conf exists
+  ✓ ../security_alerts_app/default/props.conf exists
+  ✓ ../security_alerts_app/default/transforms.conf exists
+  ✓ ../security_alerts_app/default/macros.conf exists
+
+Test 2: Checking lookup files...
+  ✓ ../security_alerts_app/lookups/authorized_ips.csv exists
+    ✓ Valid CSV format
+  ✓ ../security_alerts_app/lookups/malicious_ips.csv exists
+    ✓ Valid CSV format
+  ✓ ../security_alerts_app/lookups/sensitive_hosts.csv exists
+    ✓ Valid CSV format
+  ✓ ../security_alerts_app/lookups/authorized_users.csv exists
+    ✓ Valid CSV format
+  ✓ ../security_alerts_app/lookups/critical_files.csv exists
+    ✓ Valid CSV format
+
+Test 3: Checking dashboards...
+  ✓ ../security_alerts_app/default/data/ui/views/security_operations_dashboard.xml exists
+    ✓ Valid XML format
+  ✓ ../security_alerts_app/default/data/ui/views/ssh_monitoring_dashboard.xml exists
+    ✓ Valid XML format
+
+Test 4: Running Python validation tests...
+============================================================
+Splunk Security Alerts - Search Validation
+============================================================
+
+Validating: Unauthorized SSH Access from Unknown IPs
+  ✓ Search syntax valid
+
+Validating: Privilege Escalation Detected
+  ✗ Search syntax errors found
+
+Validating: Data Exfiltration Attempt
+  ✗ Search syntax errors found
+
+Validating: Persistence Mechanism Created
+  ✗ Search syntax errors found
+
+Validating: Lateral Movement Detected
+  ✗ Search syntax errors found
+
+Validating: Account Manipulation
+  ✗ Search syntax errors found
+
+Validating: Command and Control Beacon
+  ✗ Search syntax errors found
+
+Validating: Suspicious Process Execution
+  ✗ Search syntax errors found
+
+Validating: Failed Authentication Spike
+  ✗ Search syntax errors found
+
+Validating: Port Scanning Activity
+  ✗ Search syntax errors found
+
+Validating: Unusual Network Protocol
+  ✗ Search syntax errors found
+
+Validating: File Integrity Violation
+  ✗ Search syntax errors found
+
+Validating: Multi-Stage Attack Chain
+  ✗ Search syntax errors found
+
+============================================================
+SUMMARY
+============================================================
+Total searches: 13
+Valid searches: 1
+Errors: 1
+Warnings: 3
+
+============================================================
+ERRORS
+============================================================
+  ✗ Privilege Escalation Detected: Unbalanced square brackets
+
+============================================================
+WARNINGS
+============================================================
+  ⚠ Command and Control Beacon: Time-based command without explicit time range
+  ⚠ Failed Authentication Spike: Time-based command without explicit time range
+  ⚠ Port Scanning Activity: Time-based command without explicit time range
+
+============================================================
+exit=1

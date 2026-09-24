@@ -1,126 +1,106 @@
 [← back to the overview](../README.md)
 
-# Bugs found during the documentation pass
+# Bugs found
 
-This file records defects found in tracked code. No tracked source file was
-changed to correct them.
+| # | Entry | Status |
+|---|---|---|
+| 1 | `tests/test_searches.py` looks for `savedsearches.conf` in the wrong place | Fixed in [`766ed2d`](https://github.com/Bissbert/splunk-security-alerts/commit/766ed2d) |
+| 2 | `tests/run_tests.sh` checks paths from an older layout | Fixed in [`09e066d`](https://github.com/Bissbert/splunk-security-alerts/commit/09e066d) |
+| 3 | The validator marks every search after the first error as failed | Open |
+| 4 | The bracket check counts brackets inside quoted regexes | Open |
 
-```mermaid
-flowchart LR
-    T["Tracked test command"] --> P["Old relative path"]
-    P --> F["File lookup fails"]
-    F --> E["Exit before validation"]
-    A["Current app layout"] -.->|"not referenced"| P
+Entries 3 and 4 turned up once entries 1 and 2 were fixed and the validator
+ran for the first time, in the Linux run described in
+[How measurements were made](measurement.md). Because of entry 4, both test
+entry points currently exit 1 on a search that is valid SPL.
 
-    style F fill:#da3633,stroke:#f85149,color:#fff
-    style E fill:#9e6a03,stroke:#d29922,color:#fff
-```
+## 1. `tests/test_searches.py` looks for `savedsearches.conf` in the wrong place
 
-## `tests/test_searches.py:151` — stale saved-search path
+**Status:** fixed in [`766ed2d`](https://github.com/Bissbert/splunk-security-alerts/commit/766ed2d).
 
-### What happens
-
-The test constructs `default/savedsearches.conf` relative to the repository
-root. The current file is under
-`security_alerts_app/default/savedsearches.conf`, so the test exits before it
-loads any configuration.
-
-### How to reproduce
-
-From the repository root:
-
-```sh
-python3 tests/test_searches.py
-```
-
-Observed result:
+**What happened:** the test built `default/savedsearches.conf` relative to the
+repository root. The file is at
+`security_alerts_app/default/savedsearches.conf`, so the test exited before
+loading any configuration:
 
 ```text
 Error: Configuration file not found at .../default/savedsearches.conf
 ```
 
-### Proposed fix (not applied)
+**What changed:** the path now resolves beneath `security_alerts_app/default`.
+The test loads all 13 searches and validates them.
 
-```diff
---- a/tests/test_searches.py
-+++ b/tests/test_searches.py
-@@
--    config_path = Path(__file__).parent.parent / 'default' / 'savedsearches.conf'
-+    config_path = (Path(__file__).parent.parent / 'security_alerts_app' /
-+                   'default' / 'savedsearches.conf')
-```
+## 2. `tests/run_tests.sh` checks paths from an older layout
 
-## `tests/run_tests.sh:22-26` — stale configuration paths
+**Status:** fixed in [`09e066d`](https://github.com/Bissbert/splunk-security-alerts/commit/09e066d).
 
-### What happens
-
-The runner changes into `tests/` and checks `../default/*.conf`, but the app
-configuration is under `../security_alerts_app/default/`. The first check
-fails and the script exits before it reaches the remaining checks.
-
-### How to reproduce
-
-From the repository root:
-
-```sh
-bash tests/run_tests.sh
-```
-
-Observed result:
+**What happened:** the runner changed into `tests/` and checked
+`../default/*.conf`, `../lookups/`, `../dashboards/` and `../scripts/deploy.sh`.
+The first check failed and the script exited:
 
 ```text
 Test 1: Checking configuration files...
-../default/savedsearches.conf missing
+  ✗ ../default/savedsearches.conf missing
 ```
 
-### Proposed fix (not applied)
+**What changed:** every path now points into `security_alerts_app/`,
+`deployment/` and `docs/`. In the Linux run all four configuration files, all
+five lookups and both dashboards are found, and both dashboards pass
+`xmllint`. The runner then reaches the Python validation and exits with its
+status.
 
-```diff
---- a/tests/run_tests.sh
-+++ b/tests/run_tests.sh
-@@
--    "../default/savedsearches.conf"
--    "../default/props.conf"
--    "../default/transforms.conf"
--    "../default/macros.conf"
-+    "../security_alerts_app/default/savedsearches.conf"
-+    "../security_alerts_app/default/props.conf"
-+    "../security_alerts_app/default/transforms.conf"
-+    "../security_alerts_app/default/macros.conf"
-@@
--    "../lookups/authorized_ips.csv"
--    "../lookups/malicious_ips.csv"
--    "../lookups/sensitive_hosts.csv"
--    "../lookups/authorized_users.csv"
--    "../lookups/critical_files.csv"
-+    "../security_alerts_app/lookups/authorized_ips.csv"
-+    "../security_alerts_app/lookups/malicious_ips.csv"
-+    "../security_alerts_app/lookups/sensitive_hosts.csv"
-+    "../security_alerts_app/lookups/authorized_users.csv"
-+    "../security_alerts_app/lookups/critical_files.csv"
-@@
--    "../dashboards/security_operations_dashboard.xml"
--    "../dashboards/ssh_monitoring_dashboard.xml"
-+    "../security_alerts_app/default/data/ui/views/security_operations_dashboard.xml"
-+    "../security_alerts_app/default/data/ui/views/ssh_monitoring_dashboard.xml"
-@@
--    "../default"
--    "../lookups"
--    "../dashboards"
--    "../scripts"
--    "../documentation"
-+    "../security_alerts_app/default"
-+    "../security_alerts_app/lookups"
-+    "../security_alerts_app/default/data/ui/views"
-+    "../security_alerts_app/bin"
-+    "../docs"
-@@
--if [[ -f "../scripts/deploy.sh" ]]; then
-+if [[ -f "../deployment/deploy.sh" ]]; then
-@@
--    if [[ -x "../scripts/deploy.sh" ]]; then
-+    if [[ -x "../deployment/deploy.sh" ]]; then
+## 3. The validator marks every search after the first error as failed
+
+**Status:** open.
+
+**File:** `tests/test_searches.py:52`
+
+**What happens:** `validate_search_syntax` ends with
+`return len(self.errors) == 0`. `self.errors` collects errors for every search
+checked so far, so once one search has an error, every later search is
+reported as failed even when it has none. The summary shows the mismatch:
+
+```text
+Validating: Privilege Escalation Detected
+  ✗ Search syntax errors found
+Validating: Data Exfiltration Attempt
+  ✗ Search syntax errors found
+...
+Total searches: 13
+Valid searches: 1
+Errors: 1
 ```
 
-The proposed paths reflect the current repository layout; the test behavior
-and expected assertions would still need a separate verification run.
+**Possible fix:** remember `len(self.errors)` at the start of the method and
+return whether it grew.
+
+## 4. The bracket check counts brackets inside quoted regexes
+
+**Status:** open.
+
+**File:** `tests/test_searches.py:40-41`
+
+**What happens:** the check compares the number of `[` and `]` characters in
+the whole query. **Privilege Escalation Detected** matches `su` log lines with
+the regex `"su\\[.*authentication success"`. That `[` is escaped inside a
+quoted string, so the SPL is valid, but the check reports:
+
+```text
+✗ Privilege Escalation Detected: Unbalanced square brackets
+```
+
+This is the only error, and it makes `python3 tests/test_searches.py` and
+`bash tests/run_tests.sh` exit 1.
+
+**Possible fix:** skip quoted strings before counting brackets, which is what
+SPL subsearch brackets need anyway.
+
+## Reproduce
+
+```sh
+sh tools/linux-run.sh
+```
+
+The relevant sections of the output are `python3 tests/test_searches.py` and
+`bash tests/run_tests.sh`; a recorded run is in
+[`media/captures/linux-run.txt`](../media/captures/linux-run.txt).

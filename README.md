@@ -116,12 +116,13 @@ All tuning is done through lookup CSV files and Splunk's saved search threshold 
 
 Splunk version 8.0 or later required (Enterprise or Cloud). Logs must be indexed before alerts fire.
 
-## Measured repository inventory
+## Results
 
-These are source measurements from `python3 tools/measure_alerts.py`, not
-runtime or detection-performance benchmarks.
+From `python3 tools/measure_alerts.py`, run in a Linux container by
+`tools/linux-run.sh`. These count checked-in files; they are not runtime or
+detection-performance benchmarks.
 
-| Artifact | Measured value |
+| Artifact | Value |
 |---|---:|
 | Saved-search stanzas | 13 |
 | Static severity `5` / `4` / `3` | 4 / 5 / 4 |
@@ -137,7 +138,7 @@ runtime or detection-performance benchmarks.
 
 The alert names, thresholds, windows, suppression keys, routing, and false
 positive notes are in the [alert reference](docs/alert-reference.md). The
-measurement method and unverified areas are in
+method, the test results and what was not covered are in
 [How measurements were made](docs/measurement.md).
 
 ## Repository layout
@@ -153,7 +154,7 @@ docs/                    source-backed diagrams and operating notes
 scripts/                 hooks and package creation
 security/                policies, playbooks, and security documentation
 tests/                   repository validation scripts
-tools/                   measurement scripts used by this documentation
+tools/                   measurement script and the Linux container run
 ```
 
 ## Known limitations
@@ -169,10 +170,10 @@ tools/                   measurement scripts used by this documentation
   operating procedures, not states implemented in these files.
 - Seven lookup references in the configuration do not have matching CSV files.
   The exact names are listed in [Data and enrichment](docs/data-and-enrichment.md).
-- The test scripts used paths from an older app layout and failed before
-  validating the current files. Those paths were corrected on the default
-  branch after this pass; the suite still validates configuration only and
-  does not execute SPL.
+- The tests validate configuration only and do not execute SPL. Both test
+  entry points currently exit 1 on a false positive in the bracket check, and
+  the validator marks every search after the first error as failed (open
+  entries 3 and 4 in [Bugs found](docs/BUGS-FOUND.md)).
 - The secure deployment script was not run. It requires a live Splunk host,
   suitable permissions, credentials, and host-level tools.
 
