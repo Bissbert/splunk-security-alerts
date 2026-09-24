@@ -66,53 +66,48 @@ Validating: Unauthorized SSH Access from Unknown IPs
   ✓ Search syntax valid
 
 Validating: Privilege Escalation Detected
-  ✗ Search syntax errors found
+  ✓ Search syntax valid
 
 Validating: Data Exfiltration Attempt
-  ✗ Search syntax errors found
+  ✓ Search syntax valid
 
 Validating: Persistence Mechanism Created
-  ✗ Search syntax errors found
+  ✓ Search syntax valid
 
 Validating: Lateral Movement Detected
-  ✗ Search syntax errors found
+  ✓ Search syntax valid
 
 Validating: Account Manipulation
-  ✗ Search syntax errors found
+  ✓ Search syntax valid
 
 Validating: Command and Control Beacon
-  ✗ Search syntax errors found
+  ✓ Search syntax valid
 
 Validating: Suspicious Process Execution
-  ✗ Search syntax errors found
+  ✓ Search syntax valid
 
 Validating: Failed Authentication Spike
-  ✗ Search syntax errors found
+  ✓ Search syntax valid
 
 Validating: Port Scanning Activity
-  ✗ Search syntax errors found
+  ✓ Search syntax valid
 
 Validating: Unusual Network Protocol
-  ✗ Search syntax errors found
+  ✓ Search syntax valid
 
 Validating: File Integrity Violation
-  ✗ Search syntax errors found
+  ✓ Search syntax valid
 
 Validating: Multi-Stage Attack Chain
-  ✗ Search syntax errors found
+  ✓ Search syntax valid
 
 ============================================================
 SUMMARY
 ============================================================
 Total searches: 13
-Valid searches: 1
-Errors: 1
+Valid searches: 13
+Errors: 0
 Warnings: 3
-
-============================================================
-ERRORS
-============================================================
-  ✗ Privilege Escalation Detected: Unbalanced square brackets
 
 ============================================================
 WARNINGS
@@ -122,7 +117,42 @@ WARNINGS
   ⚠ Port Scanning Activity: Time-based command without explicit time range
 
 ============================================================
-exit=1
+exit=0
+
+=== python3 -m unittest test_validator test_app_files
+test_bad_severity_and_missing_lookup_warn (test_validator.ConfigRunTest.test_bad_severity_and_missing_lookup_warn) ... ok
+test_counts_only_the_broken_search (test_validator.ConfigRunTest.test_counts_only_the_broken_search) ... ok
+test_missing_fields_and_bad_cron (test_validator.ConfigRunTest.test_missing_fields_and_bad_cron) ... ok
+test_valid_config_exits_0 (test_validator.ConfigRunTest.test_valid_config_exits_0) ... ok
+test_later_search_passes_after_an_earlier_error (test_validator.PerSearchResultTest.test_later_search_passes_after_an_earlier_error) ... ok
+test_drops_quoted_text (test_validator.ScanSplTest.test_drops_quoted_text) ... ok
+test_escaped_bracket_in_regex (test_validator.ScanSplTest.test_escaped_bracket_in_regex) ... ok
+test_escaped_quote_stays_inside_string (test_validator.ScanSplTest.test_escaped_quote_stays_inside_string) ... ok
+test_reports_open_quote (test_validator.ScanSplTest.test_reports_open_quote) ... ok
+test_all_shipped_searches_are_valid (test_validator.ShippedConfigTest.test_all_shipped_searches_are_valid) ... ok
+test_bracket_inside_quoted_regex_is_valid (test_validator.SyntaxCheckTest.test_bracket_inside_quoted_regex_is_valid) ... ok
+test_close_before_open (test_validator.SyntaxCheckTest.test_close_before_open) ... ok
+test_empty_search (test_validator.SyntaxCheckTest.test_empty_search) ... ok
+test_missing_index_warns (test_validator.SyntaxCheckTest.test_missing_index_warns) ... ok
+test_paren_inside_quoted_string_is_valid (test_validator.SyntaxCheckTest.test_paren_inside_quoted_string_is_valid) ... ok
+test_subsearch_brackets_are_valid (test_validator.SyntaxCheckTest.test_subsearch_brackets_are_valid) ... ok
+test_unbalanced_subsearch_bracket (test_validator.SyntaxCheckTest.test_unbalanced_subsearch_bracket) ... ok
+test_unterminated_quote (test_validator.SyntaxCheckTest.test_unterminated_quote) ... ok
+test_valid_search (test_validator.SyntaxCheckTest.test_valid_search) ... ok
+test_conf_files_parse (test_app_files.ConfFilesTest.test_conf_files_parse) ... ok
+test_dashboards_parse (test_app_files.DashboardsTest.test_dashboards_parse) ... ok
+test_every_csv_has_a_header_and_even_rows (test_app_files.LookupFilesTest.test_every_csv_has_a_header_and_even_rows) ... ok
+test_search_lookup_fields_exist_in_the_csv (test_app_files.LookupFilesTest.test_search_lookup_fields_exist_in_the_csv) ... ok
+test_lookups_used_by_searches_are_shipped (test_app_files.SavedSearchesTest.test_lookups_used_by_searches_are_shipped) ... ok
+test_severity_and_dispatch_window (test_app_files.SavedSearchesTest.test_severity_and_dispatch_window) ... ok
+test_suppression_fields_are_set (test_app_files.SavedSearchesTest.test_suppression_fields_are_set) ... ok
+test_thirteen_searches (test_app_files.SavedSearchesTest.test_thirteen_searches) ... ok
+
+----------------------------------------------------------------------
+Ran 27 tests in 0.012s
+
+OK
+exit=0
 
 === bash tests/run_tests.sh
 ======================================
@@ -162,53 +192,48 @@ Validating: Unauthorized SSH Access from Unknown IPs
   ✓ Search syntax valid
 
 Validating: Privilege Escalation Detected
-  ✗ Search syntax errors found
+  ✓ Search syntax valid
 
 Validating: Data Exfiltration Attempt
-  ✗ Search syntax errors found
+  ✓ Search syntax valid
 
 Validating: Persistence Mechanism Created
-  ✗ Search syntax errors found
+  ✓ Search syntax valid
 
 Validating: Lateral Movement Detected
-  ✗ Search syntax errors found
+  ✓ Search syntax valid
 
 Validating: Account Manipulation
-  ✗ Search syntax errors found
+  ✓ Search syntax valid
 
 Validating: Command and Control Beacon
-  ✗ Search syntax errors found
+  ✓ Search syntax valid
 
 Validating: Suspicious Process Execution
-  ✗ Search syntax errors found
+  ✓ Search syntax valid
 
 Validating: Failed Authentication Spike
-  ✗ Search syntax errors found
+  ✓ Search syntax valid
 
 Validating: Port Scanning Activity
-  ✗ Search syntax errors found
+  ✓ Search syntax valid
 
 Validating: Unusual Network Protocol
-  ✗ Search syntax errors found
+  ✓ Search syntax valid
 
 Validating: File Integrity Violation
-  ✗ Search syntax errors found
+  ✓ Search syntax valid
 
 Validating: Multi-Stage Attack Chain
-  ✗ Search syntax errors found
+  ✓ Search syntax valid
 
 ============================================================
 SUMMARY
 ============================================================
 Total searches: 13
-Valid searches: 1
-Errors: 1
+Valid searches: 13
+Errors: 0
 Warnings: 3
-
-============================================================
-ERRORS
-============================================================
-  ✗ Privilege Escalation Detected: Unbalanced square brackets
 
 ============================================================
 WARNINGS
@@ -218,4 +243,55 @@ WARNINGS
   ⚠ Port Scanning Activity: Time-based command without explicit time range
 
 ============================================================
-exit=1
+test_bad_severity_and_missing_lookup_warn (test_validator.ConfigRunTest.test_bad_severity_and_missing_lookup_warn) ... ok
+test_counts_only_the_broken_search (test_validator.ConfigRunTest.test_counts_only_the_broken_search) ... ok
+test_missing_fields_and_bad_cron (test_validator.ConfigRunTest.test_missing_fields_and_bad_cron) ... ok
+test_valid_config_exits_0 (test_validator.ConfigRunTest.test_valid_config_exits_0) ... ok
+test_later_search_passes_after_an_earlier_error (test_validator.PerSearchResultTest.test_later_search_passes_after_an_earlier_error) ... ok
+test_drops_quoted_text (test_validator.ScanSplTest.test_drops_quoted_text) ... ok
+test_escaped_bracket_in_regex (test_validator.ScanSplTest.test_escaped_bracket_in_regex) ... ok
+test_escaped_quote_stays_inside_string (test_validator.ScanSplTest.test_escaped_quote_stays_inside_string) ... ok
+test_reports_open_quote (test_validator.ScanSplTest.test_reports_open_quote) ... ok
+test_all_shipped_searches_are_valid (test_validator.ShippedConfigTest.test_all_shipped_searches_are_valid) ... ok
+test_bracket_inside_quoted_regex_is_valid (test_validator.SyntaxCheckTest.test_bracket_inside_quoted_regex_is_valid) ... ok
+test_close_before_open (test_validator.SyntaxCheckTest.test_close_before_open) ... ok
+test_empty_search (test_validator.SyntaxCheckTest.test_empty_search) ... ok
+test_missing_index_warns (test_validator.SyntaxCheckTest.test_missing_index_warns) ... ok
+test_paren_inside_quoted_string_is_valid (test_validator.SyntaxCheckTest.test_paren_inside_quoted_string_is_valid) ... ok
+test_subsearch_brackets_are_valid (test_validator.SyntaxCheckTest.test_subsearch_brackets_are_valid) ... ok
+test_unbalanced_subsearch_bracket (test_validator.SyntaxCheckTest.test_unbalanced_subsearch_bracket) ... ok
+test_unterminated_quote (test_validator.SyntaxCheckTest.test_unterminated_quote) ... ok
+test_valid_search (test_validator.SyntaxCheckTest.test_valid_search) ... ok
+test_conf_files_parse (test_app_files.ConfFilesTest.test_conf_files_parse) ... ok
+test_dashboards_parse (test_app_files.DashboardsTest.test_dashboards_parse) ... ok
+test_every_csv_has_a_header_and_even_rows (test_app_files.LookupFilesTest.test_every_csv_has_a_header_and_even_rows) ... ok
+test_search_lookup_fields_exist_in_the_csv (test_app_files.LookupFilesTest.test_search_lookup_fields_exist_in_the_csv) ... ok
+test_lookups_used_by_searches_are_shipped (test_app_files.SavedSearchesTest.test_lookups_used_by_searches_are_shipped) ... ok
+test_severity_and_dispatch_window (test_app_files.SavedSearchesTest.test_severity_and_dispatch_window) ... ok
+test_suppression_fields_are_set (test_app_files.SavedSearchesTest.test_suppression_fields_are_set) ... ok
+test_thirteen_searches (test_app_files.SavedSearchesTest.test_thirteen_searches) ... ok
+
+----------------------------------------------------------------------
+Ran 27 tests in 0.011s
+
+OK
+
+Test 5: Checking directory structure...
+  ✓ ../security_alerts_app/default exists
+  ✓ ../security_alerts_app/lookups exists
+  ✓ ../security_alerts_app/default/data/ui/views exists
+  ✓ ../deployment exists
+  ✓ ../docs exists
+
+Test 6: Checking deployment script...
+  ✓ Deploy script exists
+  ✓ Deploy script is executable
+
+Test 7: Checking documentation...
+  ✓ README.md exists
+  ✓ README appears comprehensive (193 lines)
+
+======================================
+Test suite completed!
+======================================
+exit=0

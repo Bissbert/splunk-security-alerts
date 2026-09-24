@@ -11,7 +11,7 @@ when investigating a rule and the operations page when deploying it.
 | [Data and enrichment](data-and-enrichment.md) | Props, transforms, macros, lookup files, and missing lookup references. |
 | [Operations](operations.md) | Deployment flow, source-only checks, dashboards, and current validation limits. |
 | [Measurement](measurement.md) | The Linux container run: every reported number, the test results, and what was not covered. |
-| [Bugs found](BUGS-FOUND.md) | Two fixed test-path bugs and two open validator bugs. |
+| [Bugs found](BUGS-FOUND.md) | Two test-path bugs, two validator bugs and one lookup bug, all fixed. |
 
 Numbers in the component write-ups are measurements of repository files unless
 they are explicitly marked as unmeasured. The measurement script has no

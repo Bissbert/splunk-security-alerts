@@ -11,8 +11,8 @@ sh tools/linux-run.sh > media/captures/linux-run.txt
 
 [`tools/linux-run.sh`](../tools/linux-run.sh) starts `python:3.12-slim-bookworm`,
 mounts the repository read-only, copies it, and runs the measurement script,
-a syntax check of every shell script, a compile of the validator helper, and
-both test entry points. The full
+a syntax check of every shell script, a compile of the validator helper, the
+unit tests and both test entry points. The full
 output is [`media/captures/linux-run.txt`](../media/captures/linux-run.txt).
 
 No Splunk instance runs. The official image only starts after its license is
@@ -83,19 +83,14 @@ expressions themselves.
 |---|---|
 | `bash -n` on `deployment/deploy.sh`, `deployment/deploy_secure.sh`, `scripts/install-hooks.sh`, `scripts/package-splunk-app.sh`, `tests/run_tests.sh` | All pass. |
 | In-memory `compile()` of `security_alerts_app/bin/security_validator.py` | Passes. |
-| `python3 tests/test_searches.py` | Loads and validates all 13 searches. 1 error, 3 warnings, exit 1. |
-| `bash tests/run_tests.sh` | Finds all configuration files, lookups and dashboards; both dashboards pass `xmllint`. Exits 1 with the Python validation. |
+| `python3 tests/test_searches.py` | Loads and validates all 13 searches. 13 valid, 0 errors, 3 warnings, exit 0. |
+| `python3 -m unittest test_validator test_app_files` | 27 tests, OK, exit 0. |
+| `bash tests/run_tests.sh` | Finds all configuration files, lookups and dashboards; both dashboards pass `xmllint`; the Python validation and the unit tests pass. Exit 0. |
 
-The one error is a false positive:
-
-```text
-✗ Privilege Escalation Detected: Unbalanced square brackets
-```
-
-The only `[` in that search is an escaped bracket inside the quoted regex
-`"su\\[.*authentication success"`, which is valid SPL. The same run shows the
-validator reporting 12 of 13 searches as failed while listing one error. Both
-are open entries 3 and 4 in [Bugs found](BUGS-FOUND.md). Entries 1 and 2, the
+Before the fixes listed in [Bugs found](BUGS-FOUND.md), the validator flagged
+an escaped bracket inside a quoted regex as unbalanced and then reported every
+later search as failed (entries 3 and 4), and the unit tests found a lookup on
+a column `malicious_ips.csv` does not have (entry 5). Entries 1 and 2, the
 stale paths that stopped both scripts before they validated anything, are
 fixed.
 
