@@ -87,12 +87,10 @@ expressions themselves.
 | `python3 -m unittest test_validator test_app_files` | 27 tests, OK, exit 0. |
 | `bash tests/run_tests.sh` | Finds all configuration files, lookups and dashboards; both dashboards pass `xmllint`; the Python validation and the unit tests pass. Exit 0. |
 
-Before the fixes listed in [Bugs found](BUGS-FOUND.md), the validator flagged
-an escaped bracket inside a quoted regex as unbalanced and then reported every
-later search as failed (entries 3 and 4), and the unit tests found a lookup on
-a column `malicious_ips.csv` does not have (entry 5). Entries 1 and 2, the
-stale paths that stopped both scripts before they validated anything, are
-fixed.
+The unit tests include a regression test for each fixed bug:
+[#4](https://github.com/Bissbert/splunk-security-alerts/issues/4) (errors from one search failed every later search),
+[#5](https://github.com/Bissbert/splunk-security-alerts/issues/5) (brackets inside quoted text counted as unbalanced) and
+[#6](https://github.com/Bissbert/splunk-security-alerts/issues/6) (a lookup on a column `malicious_ips.csv` does not have).
 
 The three warnings say that **Command and Control Beacon**, **Failed
 Authentication Spike** and **Port Scanning Activity** use a time-based command

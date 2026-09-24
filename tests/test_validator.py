@@ -45,7 +45,7 @@ class SyntaxCheckTest(unittest.TestCase):
         self.assertEqual(self.check('index=main | stats count by host'), (True, []))
 
     def test_bracket_inside_quoted_regex_is_valid(self):
-        # Entry 4 / issue #5: the Privilege Escalation regex.
+        # Issue #5: the Privilege Escalation regex.
         ok, errors = self.check(r'index=* | regex _raw="su\\[.*authentication success"')
         self.assertTrue(ok, errors)
 
@@ -85,7 +85,7 @@ class SyntaxCheckTest(unittest.TestCase):
 
 class PerSearchResultTest(unittest.TestCase):
     def test_later_search_passes_after_an_earlier_error(self):
-        # Entry 3 / issue #4: errors from one search must not fail the next.
+        # Issue #4: errors from one search must not fail the next.
         t = tester()
         self.assertFalse(t.validate_search_syntax('bad', 'index=* | eval x=(1'))
         self.assertTrue(t.validate_search_syntax('good', 'index=* | stats count'))

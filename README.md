@@ -171,8 +171,7 @@ tools/                   measurement script and the Linux container run
 - Seven lookup references in the configuration do not have matching CSV files.
   The exact names are listed in [Data and enrichment](docs/data-and-enrichment.md).
 - The tests validate configuration only and do not execute SPL. Both test
-  entry points exit 0 with all 13 searches valid; the bugs they turned up are
-  listed as fixed in [Bugs found](docs/BUGS-FOUND.md).
+  entry points exit 0 with all 13 searches valid.
 - The secure deployment script was not run. It requires a live Splunk host,
   suitable permissions, credentials, and host-level tools.
 

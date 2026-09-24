@@ -56,8 +56,7 @@ bash tests/run_tests.sh
 
 Everything succeeds. The validator reports 13 of 13 searches valid with three
 warnings, the 27 unit tests pass, and both test entry points exit 0. To run
-only the test suite, use `sh tests/docker.sh`. The bugs fixed along the way
-are in [Bugs found](BUGS-FOUND.md). The output is in
+only the test suite, use `sh tests/docker.sh`. The output is in
 [How measurements were made](measurement.md#scripts-and-tests).
 
 ## Dashboards
